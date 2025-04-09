@@ -1,0 +1,17 @@
+server:
+  port: 8081
+  name: "inventory-service"
+
+database:
+  host: "localhost"
+  port: 5432
+  name: "inventory_db"
+  username: "postgres"
+  password: "123"
+  sslmode: "disable"
+  max_idle_connections: 10
+  max_open_connections: 100
+  connection_max_lifetime: "1h"
+
+logging:
+  level: "debug" 
