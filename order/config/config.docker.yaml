@@ -1,0 +1,20 @@
+server:
+  port: 8082
+  name: "order-service"
+
+database:
+  host: "postgres"
+  port: 5432
+  name: "order_db"
+  username: "postgres"
+  password: "123"
+  sslmode: "disable"
+  max_idle_connections: 10
+  max_open_connections: 100
+  connection_max_lifetime: "1h"
+
+inventory_service:
+  base_url: "http://inventory-service:8081"
+
+logging:
+  level: "debug" 

@@ -1,0 +1,12 @@
+server:
+  port: 8080
+  name: "api-gateway"
+
+services:
+  inventory:
+    base_url: "http://inventory-service:8081"
+  order:
+    base_url: "http://order-service:8082"
+
+logging:
+  level: "debug" 

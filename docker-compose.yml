@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:14-alpine
+    container_name: e-commerce-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Inventory service
+  inventory-service:
+    build:
+      context: ./inventory
+      dockerfile: Dockerfile
+    container_name: e-commerce-inventory
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    restart: on-failure
+
+  # Order service
+  order-service:
+    build:
+      context: ./order
+      dockerfile: Dockerfile
+    container_name: e-commerce-order
+    depends_on:
+      postgres:
+        condition: service_healthy
+      inventory-service:
+        condition: service_started
+    ports:
+      - "8082:8082"
+    restart: on-failure
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: e-commerce-api-gateway
+    depends_on:
+      - inventory-service
+      - order-service
+    ports:
+      - "8080:8080"
+    restart: on-failure
+
+volumes:
+  postgres_data: 

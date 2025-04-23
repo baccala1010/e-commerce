@@ -40,6 +40,7 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	if err := db.AutoMigrate(
 		&model.Product{},
 		&model.Category{},
+		&model.Discount{},
 	); err != nil {
 		return nil, err
 	}

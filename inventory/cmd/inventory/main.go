@@ -36,18 +36,22 @@ func main() {
 	// Initialize repositories
 	productRepo := repository.NewProductRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
+	discountRepo := repository.NewDiscountRepository(db)
 
 	// Initialize use cases
 	productUseCase := usecase.NewProductUseCase(productRepo, categoryRepo)
 	categoryUseCase := usecase.NewCategoryUseCase(categoryRepo)
+	discountUseCase := usecase.NewDiscountUseCase(discountRepo, productRepo)
 
 	// Initialize services
 	productService := service.NewProductService(productUseCase)
 	categoryService := service.NewCategoryService(categoryUseCase)
+	discountService := service.NewDiscountService(discountUseCase)
 
 	// Initialize handlers
 	productHandler := handler.NewProductHandler(productService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
+	discountHandler := handler.NewDiscountHandler(discountService)
 
 	// Set up Gin router
 	gin.SetMode(gin.ReleaseMode)
@@ -76,6 +80,7 @@ func main() {
 			products.PUT("/:id", productHandler.UpdateProduct)
 			products.DELETE("/:id", productHandler.DeleteProduct)
 			products.GET("", productHandler.ListProducts)
+			products.GET("/promotions", discountHandler.GetAllProductsWithPromotion)
 		}
 
 		// Category routes
@@ -86,6 +91,17 @@ func main() {
 			categories.PUT("/:id", categoryHandler.UpdateCategory)
 			categories.DELETE("/:id", categoryHandler.DeleteCategory)
 			categories.GET("", categoryHandler.ListCategories)
+		}
+
+		// Discount routes
+		discounts := v1.Group("/discounts")
+		{
+			discounts.POST("", discountHandler.CreateDiscount)
+			discounts.GET("/:id", discountHandler.GetDiscountByID)
+			discounts.PATCH("/:id", discountHandler.UpdateDiscount)
+			discounts.DELETE("/:id", discountHandler.DeleteDiscount)
+			discounts.GET("", discountHandler.ListDiscounts)
+			discounts.GET("/:id/products", discountHandler.GetProductsByDiscountID)
 		}
 	}
 
