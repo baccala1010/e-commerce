@@ -5,8 +5,12 @@ server:
 services:
   inventory:
     base_url: "http://inventory-service:8081"
+    grpc_host: "inventory-service"
+    grpc_port: 9081
   order:
-    base_url: "http://order-service:8082"
+    base_url: "http://order-service:8083"
+    grpc_host: "order-service"
+    grpc_port: 9082
 
 logging:
   level: "debug" 

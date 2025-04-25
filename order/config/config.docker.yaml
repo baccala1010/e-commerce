@@ -1,5 +1,6 @@
 server:
-  port: 8082
+  port: 8083
+  grpc_port: 9082
   name: "order-service"
 
 database:

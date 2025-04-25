@@ -23,7 +23,9 @@ type ServicesConfig struct {
 }
 
 type ServiceConfig struct {
-	BaseURL string `mapstructure:"base_url"`
+	BaseURL  string `mapstructure:"base_url"`
+	GRPCHost string `mapstructure:"grpc_host"`
+	GRPCPort int    `mapstructure:"grpc_port"`
 }
 
 type LoggingConfig struct {

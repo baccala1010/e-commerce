@@ -1,19 +1,36 @@
-package backoffice
+package handler
 
 import (
 	"context"
 
 	"github.com/baccala1010/e-commerce/inventory/internal/model"
 	"github.com/baccala1010/e-commerce/inventory/internal/repository"
+	"github.com/baccala1010/e-commerce/inventory/internal/usecase"
 	"github.com/baccala1010/e-commerce/inventory/pkg/pb"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+type GRPCHandler struct {
+	pb.UnimplementedInventoryServiceServer
+	productUseCase  usecase.ProductUseCase
+	categoryUseCase usecase.CategoryUseCase
+	discountUseCase usecase.DiscountUseCase
+}
+
+func NewGRPCHandler(productUseCase usecase.ProductUseCase, categoryUseCase usecase.CategoryUseCase, discountUseCase usecase.DiscountUseCase) *GRPCHandler {
+	return &GRPCHandler{
+		productUseCase:  productUseCase,
+		categoryUseCase: categoryUseCase,
+		discountUseCase: discountUseCase,
+	}
+}
+
 // Product methods
-func (s *Server) CreateProduct(ctx context.Context, req *pb.CreateProductRequest) (*pb.ProductResponse, error) {
+func (h *GRPCHandler) CreateProduct(ctx context.Context, req *pb.CreateProductRequest) (*pb.ProductResponse, error) {
 	categoryID, err := uuid.Parse(req.CategoryId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid category ID: %v", err)
@@ -27,7 +44,7 @@ func (s *Server) CreateProduct(ctx context.Context, req *pb.CreateProductRequest
 		CategoryID:  categoryID,
 	}
 
-	product, err := s.productUseCase.CreateProduct(createReq)
+	product, err := h.productUseCase.CreateProduct(createReq)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create product: %v", err)
 	}
@@ -37,13 +54,13 @@ func (s *Server) CreateProduct(ctx context.Context, req *pb.CreateProductRequest
 	}, nil
 }
 
-func (s *Server) GetProductByID(ctx context.Context, req *pb.GetProductRequest) (*pb.ProductResponse, error) {
+func (h *GRPCHandler) GetProductByID(ctx context.Context, req *pb.GetProductRequest) (*pb.ProductResponse, error) {
 	productID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid product ID: %v", err)
 	}
 
-	product, err := s.productUseCase.GetProductByID(productID)
+	product, err := h.productUseCase.GetProductByID(productID)
 	if err != nil {
 		if err.Error() == model.ErrProductNotFound {
 			return nil, status.Errorf(codes.NotFound, "product not found")
@@ -56,7 +73,7 @@ func (s *Server) GetProductByID(ctx context.Context, req *pb.GetProductRequest) 
 	}, nil
 }
 
-func (s *Server) UpdateProduct(ctx context.Context, req *pb.UpdateProductRequest) (*pb.ProductResponse, error) {
+func (h *GRPCHandler) UpdateProduct(ctx context.Context, req *pb.UpdateProductRequest) (*pb.ProductResponse, error) {
 	productID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid product ID: %v", err)
@@ -84,7 +101,7 @@ func (s *Server) UpdateProduct(ctx context.Context, req *pb.UpdateProductRequest
 		updateReq.CategoryID = &categoryID
 	}
 
-	product, err := s.productUseCase.UpdateProduct(productID, updateReq)
+	product, err := h.productUseCase.UpdateProduct(productID, updateReq)
 	if err != nil {
 		if err.Error() == model.ErrProductNotFound {
 			return nil, status.Errorf(codes.NotFound, "product not found")
@@ -100,13 +117,13 @@ func (s *Server) UpdateProduct(ctx context.Context, req *pb.UpdateProductRequest
 	}, nil
 }
 
-func (s *Server) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest) (*emptypb.Empty, error) {
+func (h *GRPCHandler) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest) (*emptypb.Empty, error) {
 	productID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid product ID: %v", err)
 	}
 
-	if err := s.productUseCase.DeleteProduct(productID); err != nil {
+	if err := h.productUseCase.DeleteProduct(productID); err != nil {
 		if err.Error() == model.ErrProductNotFound {
 			return nil, status.Errorf(codes.NotFound, "product not found")
 		}
@@ -116,7 +133,7 @@ func (s *Server) DeleteProduct(ctx context.Context, req *pb.DeleteProductRequest
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) ListProducts(ctx context.Context, req *pb.ListProductsRequest) (*pb.ListProductsResponse, error) {
+func (h *GRPCHandler) ListProducts(ctx context.Context, req *pb.ListProductsRequest) (*pb.ListProductsResponse, error) {
 	params := repository.ListProductParams{
 		Page:     int(req.Page),
 		PageSize: int(req.Limit),
@@ -130,7 +147,7 @@ func (s *Server) ListProducts(ctx context.Context, req *pb.ListProductsRequest) 
 		params.CategoryID = &categoryID
 	}
 
-	products, total, err := s.productUseCase.ListProducts(params)
+	products, total, err := h.productUseCase.ListProducts(params)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to list products: %v", err)
 	}
@@ -147,13 +164,13 @@ func (s *Server) ListProducts(ctx context.Context, req *pb.ListProductsRequest) 
 }
 
 // Category methods
-func (s *Server) CreateCategory(ctx context.Context, req *pb.CreateCategoryRequest) (*pb.CategoryResponse, error) {
+func (h *GRPCHandler) CreateCategory(ctx context.Context, req *pb.CreateCategoryRequest) (*pb.CategoryResponse, error) {
 	createReq := model.CreateCategoryRequest{
 		Name:        req.Name,
 		Description: req.Description,
 	}
 
-	category, err := s.categoryUseCase.CreateCategory(createReq)
+	category, err := h.categoryUseCase.CreateCategory(createReq)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create category: %v", err)
 	}
@@ -163,13 +180,13 @@ func (s *Server) CreateCategory(ctx context.Context, req *pb.CreateCategoryReque
 	}, nil
 }
 
-func (s *Server) GetCategoryByID(ctx context.Context, req *pb.GetCategoryRequest) (*pb.CategoryResponse, error) {
+func (h *GRPCHandler) GetCategoryByID(ctx context.Context, req *pb.GetCategoryRequest) (*pb.CategoryResponse, error) {
 	categoryID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid category ID: %v", err)
 	}
 
-	category, err := s.categoryUseCase.GetCategoryByID(categoryID)
+	category, err := h.categoryUseCase.GetCategoryByID(categoryID)
 	if err != nil {
 		if err.Error() == model.ErrCategoryNotFound {
 			return nil, status.Errorf(codes.NotFound, "category not found")
@@ -182,7 +199,7 @@ func (s *Server) GetCategoryByID(ctx context.Context, req *pb.GetCategoryRequest
 	}, nil
 }
 
-func (s *Server) UpdateCategory(ctx context.Context, req *pb.UpdateCategoryRequest) (*pb.CategoryResponse, error) {
+func (h *GRPCHandler) UpdateCategory(ctx context.Context, req *pb.UpdateCategoryRequest) (*pb.CategoryResponse, error) {
 	categoryID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid category ID: %v", err)
@@ -196,7 +213,7 @@ func (s *Server) UpdateCategory(ctx context.Context, req *pb.UpdateCategoryReque
 		updateReq.Description = req.Description
 	}
 
-	category, err := s.categoryUseCase.UpdateCategory(categoryID, updateReq)
+	category, err := h.categoryUseCase.UpdateCategory(categoryID, updateReq)
 	if err != nil {
 		if err.Error() == model.ErrCategoryNotFound {
 			return nil, status.Errorf(codes.NotFound, "category not found")
@@ -209,13 +226,13 @@ func (s *Server) UpdateCategory(ctx context.Context, req *pb.UpdateCategoryReque
 	}, nil
 }
 
-func (s *Server) DeleteCategory(ctx context.Context, req *pb.DeleteCategoryRequest) (*emptypb.Empty, error) {
+func (h *GRPCHandler) DeleteCategory(ctx context.Context, req *pb.DeleteCategoryRequest) (*emptypb.Empty, error) {
 	categoryID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid category ID: %v", err)
 	}
 
-	if err := s.categoryUseCase.DeleteCategory(categoryID); err != nil {
+	if err := h.categoryUseCase.DeleteCategory(categoryID); err != nil {
 		if err.Error() == model.ErrCategoryNotFound {
 			return nil, status.Errorf(codes.NotFound, "category not found")
 		}
@@ -225,8 +242,8 @@ func (s *Server) DeleteCategory(ctx context.Context, req *pb.DeleteCategoryReque
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) ListCategories(ctx context.Context, req *pb.ListCategoriesRequest) (*pb.ListCategoriesResponse, error) {
-	categories, err := s.categoryUseCase.ListCategories()
+func (h *GRPCHandler) ListCategories(ctx context.Context, req *pb.ListCategoriesRequest) (*pb.ListCategoriesResponse, error) {
+	categories, err := h.categoryUseCase.ListCategories()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to list categories: %v", err)
 	}
@@ -242,8 +259,33 @@ func (s *Server) ListCategories(ctx context.Context, req *pb.ListCategoriesReque
 	}, nil
 }
 
+// Helper functions to convert between model and proto
+func convertProductToProto(product *model.Product) *pb.Product {
+	return &pb.Product{
+		Id:          product.ID.String(),
+		Name:        product.Name,
+		Description: product.Description,
+		Price:       product.Price,
+		StockLevel:  int32(product.StockLevel),
+		CategoryId:  product.CategoryID.String(),
+		Category:    convertCategoryToProto(&product.Category),
+		CreatedAt:   timestamppb.New(product.CreatedAt),
+		UpdatedAt:   timestamppb.New(product.UpdatedAt),
+	}
+}
+
+func convertCategoryToProto(category *model.Category) *pb.Category {
+	return &pb.Category{
+		Id:          category.ID.String(),
+		Name:        category.Name,
+		Description: category.Description,
+		CreatedAt:   timestamppb.New(category.CreatedAt),
+		UpdatedAt:   timestamppb.New(category.UpdatedAt),
+	}
+}
+
 // Discount methods
-func (s *Server) CreateDiscount(ctx context.Context, req *pb.CreateDiscountRequest) (*pb.DiscountResponse, error) {
+func (h *GRPCHandler) CreateDiscount(ctx context.Context, req *pb.CreateDiscountRequest) (*pb.DiscountResponse, error) {
 	// Convert applicable products from strings to UUIDs
 	applicableProducts := make([]uuid.UUID, 0, len(req.ApplicableProducts))
 	for _, productID := range req.ApplicableProducts {
@@ -263,7 +305,7 @@ func (s *Server) CreateDiscount(ctx context.Context, req *pb.CreateDiscountReque
 		EndDate:            req.EndDate.AsTime(),
 	}
 
-	discount, err := s.discountUseCase.CreateDiscount(createReq)
+	discount, err := h.discountUseCase.CreateDiscount(createReq)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create discount: %v", err)
 	}
@@ -273,13 +315,13 @@ func (s *Server) CreateDiscount(ctx context.Context, req *pb.CreateDiscountReque
 	}, nil
 }
 
-func (s *Server) GetDiscountByID(ctx context.Context, req *pb.GetDiscountRequest) (*pb.DiscountResponse, error) {
+func (h *GRPCHandler) GetDiscountByID(ctx context.Context, req *pb.GetDiscountRequest) (*pb.DiscountResponse, error) {
 	discountID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid discount ID: %v", err)
 	}
 
-	discount, err := s.discountUseCase.GetDiscountByID(discountID)
+	discount, err := h.discountUseCase.GetDiscountByID(discountID)
 	if err != nil {
 		if err.Error() == model.ErrDiscountNotFound {
 			return nil, status.Errorf(codes.NotFound, "discount not found")
@@ -292,7 +334,7 @@ func (s *Server) GetDiscountByID(ctx context.Context, req *pb.GetDiscountRequest
 	}, nil
 }
 
-func (s *Server) UpdateDiscount(ctx context.Context, req *pb.UpdateDiscountRequest) (*pb.DiscountResponse, error) {
+func (h *GRPCHandler) UpdateDiscount(ctx context.Context, req *pb.UpdateDiscountRequest) (*pb.DiscountResponse, error) {
 	discountID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid discount ID: %v", err)
@@ -334,7 +376,7 @@ func (s *Server) UpdateDiscount(ctx context.Context, req *pb.UpdateDiscountReque
 		updateReq.EndDate = &endDate
 	}
 
-	discount, err := s.discountUseCase.UpdateDiscount(discountID, updateReq)
+	discount, err := h.discountUseCase.UpdateDiscount(discountID, updateReq)
 	if err != nil {
 		if err.Error() == model.ErrDiscountNotFound {
 			return nil, status.Errorf(codes.NotFound, "discount not found")
@@ -347,13 +389,13 @@ func (s *Server) UpdateDiscount(ctx context.Context, req *pb.UpdateDiscountReque
 	}, nil
 }
 
-func (s *Server) DeleteDiscount(ctx context.Context, req *pb.DeleteDiscountRequest) (*emptypb.Empty, error) {
+func (h *GRPCHandler) DeleteDiscount(ctx context.Context, req *pb.DeleteDiscountRequest) (*emptypb.Empty, error) {
 	discountID, err := uuid.Parse(req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid discount ID: %v", err)
 	}
 
-	err = s.discountUseCase.DeleteDiscount(discountID)
+	err = h.discountUseCase.DeleteDiscount(discountID)
 	if err != nil {
 		if err.Error() == model.ErrDiscountNotFound {
 			return nil, status.Errorf(codes.NotFound, "discount not found")
@@ -364,8 +406,8 @@ func (s *Server) DeleteDiscount(ctx context.Context, req *pb.DeleteDiscountReque
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) GetAllProductsWithPromotion(ctx context.Context, req *pb.GetProductsWithPromotionRequest) (*pb.ListProductsResponse, error) {
-	productsWithPromotions, err := s.discountUseCase.GetAllProductsWithPromotion()
+func (h *GRPCHandler) GetAllProductsWithPromotion(ctx context.Context, req *pb.GetProductsWithPromotionRequest) (*pb.ListProductsResponse, error) {
+	productsWithPromotions, err := h.discountUseCase.GetAllProductsWithPromotion()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get products with promotions: %v", err)
 	}
@@ -388,13 +430,13 @@ func (s *Server) GetAllProductsWithPromotion(ctx context.Context, req *pb.GetPro
 	}, nil
 }
 
-func (s *Server) GetProductsByDiscountID(ctx context.Context, req *pb.GetProductsByDiscountIDRequest) (*pb.ListProductsResponse, error) {
+func (h *GRPCHandler) GetProductsByDiscountID(ctx context.Context, req *pb.GetProductsByDiscountIDRequest) (*pb.ListProductsResponse, error) {
 	discountID, err := uuid.Parse(req.DiscountId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid discount ID: %v", err)
 	}
 
-	products, err := s.discountUseCase.GetProductsByDiscountID(discountID)
+	products, err := h.discountUseCase.GetProductsByDiscountID(discountID)
 	if err != nil {
 		if err.Error() == model.ErrDiscountNotFound {
 			return nil, status.Errorf(codes.NotFound, "discount not found")
@@ -412,4 +454,26 @@ func (s *Server) GetProductsByDiscountID(ctx context.Context, req *pb.GetProduct
 		Products: protoProducts,
 		Total:    int32(len(protoProducts)),
 	}, nil
+}
+
+// Helper function to convert model.Discount to pb.Discount
+func convertDiscountToProto(discount *model.Discount) *pb.Discount {
+	// Convert applicable products from UUIDs to strings
+	applicableProducts := make([]string, 0, len(discount.ApplicableProducts))
+	for _, productID := range discount.ApplicableProducts {
+		applicableProducts = append(applicableProducts, productID.String())
+	}
+
+	return &pb.Discount{
+		Id:                 discount.ID.String(),
+		Name:               discount.Name,
+		Description:        discount.Description,
+		DiscountPercentage: discount.DiscountPercentage,
+		ApplicableProducts: applicableProducts,
+		StartDate:          timestamppb.New(discount.StartDate),
+		EndDate:            timestamppb.New(discount.EndDate),
+		IsActive:           discount.IsActive,
+		CreatedAt:          timestamppb.New(discount.CreatedAt),
+		UpdatedAt:          timestamppb.New(discount.UpdatedAt),
+	}
 }

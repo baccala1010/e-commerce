@@ -1,0 +1,130 @@
+syntax = "proto3";
+package order;
+option go_package = "github.com/baccala1010/e-commerce/order/pkg/pb";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
+  rpc GetOrderByID(GetOrderRequest) returns (OrderResponse);
+  rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (OrderResponse);
+  rpc ListUserOrders(ListUserOrdersRequest) returns (ListOrdersResponse);
+  
+  rpc ProcessPayment(ProcessPaymentRequest) returns (PaymentResponse);
+  rpc GetPaymentByID(GetPaymentRequest) returns (PaymentResponse);
+  rpc UpdatePaymentStatus(UpdatePaymentStatusRequest) returns (PaymentResponse);
+}
+
+// Order status enum
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_STATUS_PENDING = 1;
+  ORDER_STATUS_PAID = 2;
+  ORDER_STATUS_SHIPPED = 3;
+  ORDER_STATUS_DELIVERED = 4;
+  ORDER_STATUS_CANCELLED = 5;
+}
+
+// Payment status enum
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_STATUS_PENDING = 1;
+  PAYMENT_STATUS_SUCCESS = 2;
+  PAYMENT_STATUS_FAILED = 3;
+  PAYMENT_STATUS_REFUNDED = 4;
+}
+
+// Payment method enum
+enum PaymentMethod {
+  PAYMENT_METHOD_UNSPECIFIED = 0;
+  PAYMENT_METHOD_CREDIT_CARD = 1;
+  PAYMENT_METHOD_DEBIT_CARD = 2;
+  PAYMENT_METHOD_PAYPAL = 3;
+  PAYMENT_METHOD_BANK_WIRE = 4;
+}
+
+// Order messages
+message Order {
+  string id = 1;
+  string user_id = 2;
+  OrderStatus status = 3;
+  double total_amount = 4;
+  string shipping_name = 5;
+  string shipping_email = 6;
+  string shipping_phone = 7;
+  string shipping_address = 8;
+  Payment payment = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  double total_amount = 2;
+  PaymentInfo payment = 3;
+  string shipping_name = 4;
+  string shipping_email = 5;
+  string shipping_phone = 6;
+  string shipping_address = 7;
+}
+
+message PaymentInfo {
+  PaymentMethod method = 1;
+}
+
+message GetOrderRequest {
+  string id = 1;
+}
+
+message UpdateOrderStatusRequest {
+  string id = 1;
+  OrderStatus status = 2;
+}
+
+message ListUserOrdersRequest {
+  string user_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message ListOrdersResponse {
+  repeated Order orders = 1;
+  int32 total = 2;
+}
+
+message OrderResponse {
+  Order order = 1;
+}
+
+// Payment messages
+message Payment {
+  string id = 1;
+  string order_id = 2;
+  double amount = 3;
+  PaymentMethod method = 4;
+  PaymentStatus status = 5;
+  string transaction_id = 6;
+  google.protobuf.Timestamp payment_date = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message ProcessPaymentRequest {
+  string order_id = 1;
+  PaymentMethod method = 2;
+}
+
+message GetPaymentRequest {
+  string id = 1;
+}
+
+message UpdatePaymentStatusRequest {
+  string id = 1;
+  PaymentStatus status = 2;
+  string transaction_id = 3;
+}
+
+message PaymentResponse {
+  Payment payment = 1;
+}

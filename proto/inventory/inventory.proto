@@ -1,0 +1,180 @@
+syntax = "proto3";
+package inventory;
+option go_package = "github.com/baccala1010/e-commerce/inventory/pkg/pb";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service InventoryService {
+  rpc CreateProduct(CreateProductRequest) returns (ProductResponse);
+  rpc GetProductByID(GetProductRequest) returns (ProductResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (ProductResponse);
+  rpc DeleteProduct(DeleteProductRequest) returns (google.protobuf.Empty);
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+
+  rpc CreateCategory(CreateCategoryRequest) returns (CategoryResponse);
+  rpc GetCategoryByID(GetCategoryRequest) returns (CategoryResponse);
+  rpc UpdateCategory(UpdateCategoryRequest) returns (CategoryResponse);
+  rpc DeleteCategory(DeleteCategoryRequest) returns (google.protobuf.Empty);
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
+
+  // Discount/Promotion methods
+  rpc CreateDiscount(CreateDiscountRequest) returns (DiscountResponse);
+  rpc GetDiscountByID(GetDiscountRequest) returns (DiscountResponse);
+  rpc UpdateDiscount(UpdateDiscountRequest) returns (DiscountResponse);
+  rpc DeleteDiscount(DeleteDiscountRequest) returns (google.protobuf.Empty);
+  rpc GetAllProductsWithPromotion(GetProductsWithPromotionRequest) returns (ListProductsResponse);
+  rpc GetProductsByDiscountID(GetProductsByDiscountIDRequest) returns (ListProductsResponse);
+}
+
+// Product messages
+message Product {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+  int32 stock_level = 5;
+  string category_id = 6;
+  Category category = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  double price = 3;
+  int32 stock_level = 4;
+  string category_id = 5;
+}
+
+message GetProductRequest {
+  string id = 1;
+}
+
+message UpdateProductRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string description = 3;
+  optional double price = 4;
+  optional int32 stock_level = 5;
+  optional string category_id = 6;
+}
+
+message DeleteProductRequest {
+  string id = 1;
+}
+
+message ListProductsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string category_id = 3;
+}
+
+message ListProductsResponse {
+  repeated Product products = 1;
+  int32 total = 2;
+}
+
+message ProductResponse {
+  Product product = 1;
+}
+
+// Category messages
+message Category {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+message CreateCategoryRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message GetCategoryRequest {
+  string id = 1;
+}
+
+message UpdateCategoryRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string description = 3;
+}
+
+message DeleteCategoryRequest {
+  string id = 1;
+}
+
+message ListCategoriesRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message ListCategoriesResponse {
+  repeated Category categories = 1;
+  int32 total = 2;
+}
+
+message CategoryResponse {
+  Category category = 1;
+}
+
+// Discount messages
+message Discount {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  double discount_percentage = 4;
+  repeated string applicable_products = 5;
+  google.protobuf.Timestamp start_date = 6;
+  google.protobuf.Timestamp end_date = 7;
+  bool is_active = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message CreateDiscountRequest {
+  string name = 1;
+  string description = 2;
+  double discount_percentage = 3;
+  repeated string applicable_products = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+}
+
+message GetDiscountRequest {
+  string id = 1;
+}
+
+message UpdateDiscountRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string description = 3;
+  optional double discount_percentage = 4;
+  repeated string applicable_products = 5;
+  optional google.protobuf.Timestamp start_date = 6;
+  optional google.protobuf.Timestamp end_date = 7;
+  optional bool is_active = 8;
+}
+
+message DeleteDiscountRequest {
+  string id = 1;
+}
+
+message GetProductsWithPromotionRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message GetProductsByDiscountIDRequest {
+  string discount_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message DiscountResponse {
+  Discount discount = 1;
+}

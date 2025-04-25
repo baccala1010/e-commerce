@@ -14,8 +14,9 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port int
-	Name string
+	Port     int
+	GRPCPort int `mapstructure:"grpc_port"`
+	Name     string
 }
 
 type DatabaseConfig struct {
