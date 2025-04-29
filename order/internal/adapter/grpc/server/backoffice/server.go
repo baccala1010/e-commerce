@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // Order methods
@@ -166,4 +167,96 @@ func (s *Server) UpdatePaymentStatus(ctx context.Context, req *pb.UpdatePaymentS
 	// In a real implementation, this would update the payment status in the repository
 	// For now, we'll return a not implemented error
 	return nil, status.Errorf(codes.Unimplemented, "UpdatePaymentStatus is not implemented")
+}
+
+// Review methods
+func (s *Server) CreateReview(ctx context.Context, req *pb.CreateReviewRequest) (*pb.ReviewResponse, error) {
+	orderID, err := uuid.Parse(req.OrderId)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid order ID: %v", err)
+	}
+
+	userID, err := uuid.Parse(req.UserId)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid user ID: %v", err)
+	}
+
+	createReq := model.CreateReviewRequest{
+		OrderID:     orderID,
+		UserID:      userID,
+		Rating:      convertProtoRatingToModel(req.Rating),
+		Description: req.Description,
+	}
+
+	review, err := s.reviewUseCase.CreateReview(createReq)
+	if err != nil {
+		if err.Error() == model.ErrOrderNotFound {
+			return nil, status.Errorf(codes.NotFound, "order not found")
+		}
+		return nil, status.Errorf(codes.Internal, "failed to create review: %v", err)
+	}
+
+	return &pb.ReviewResponse{
+		Review: convertReviewToProto(review),
+	}, nil
+}
+
+func (s *Server) GetReview(ctx context.Context, req *pb.GetReviewRequest) (*pb.ReviewResponse, error) {
+	reviewID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid review ID: %v", err)
+	}
+
+	review, err := s.reviewUseCase.GetReviewByID(reviewID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get review: %v", err)
+	}
+
+	if review == nil {
+		return nil, status.Errorf(codes.NotFound, "review not found")
+	}
+
+	return &pb.ReviewResponse{
+		Review: convertReviewToProto(review),
+	}, nil
+}
+
+func (s *Server) GetOrderReviews(ctx context.Context, req *pb.GetOrderReviewsRequest) (*pb.GetOrderReviewsResponse, error) {
+	orderID, err := uuid.Parse(req.OrderId)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid order ID: %v", err)
+	}
+
+	reviews, err := s.reviewUseCase.GetReviewsByOrderID(orderID)
+	if err != nil {
+		if err.Error() == model.ErrOrderNotFound {
+			return nil, status.Errorf(codes.NotFound, "order not found")
+		}
+		return nil, status.Errorf(codes.Internal, "failed to get order reviews: %v", err)
+	}
+
+	protoReviews := make([]*pb.Review, len(reviews))
+	for i, review := range reviews {
+		protoReviews[i] = convertReviewToProto(&review)
+	}
+
+	return &pb.GetOrderReviewsResponse{
+		Reviews: protoReviews,
+	}, nil
+}
+
+func (s *Server) DeleteReview(ctx context.Context, req *pb.DeleteReviewRequest) (*emptypb.Empty, error) {
+	reviewID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid review ID: %v", err)
+	}
+
+	if err := s.reviewUseCase.DeleteReview(reviewID); err != nil {
+		if err.Error() == model.ErrReviewNotFound {
+			return nil, status.Errorf(codes.NotFound, "review not found")
+		}
+		return nil, status.Errorf(codes.Internal, "failed to delete review: %v", err)
+	}
+
+	return &emptypb.Empty{}, nil
 }

@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/baccala1010/e-commerce/order/internal/adapter/grpc/server/backoffice"
 	"github.com/baccala1010/e-commerce/order/internal/app"
 	"github.com/baccala1010/e-commerce/order/internal/config"
 	"github.com/baccala1010/e-commerce/order/internal/database"
@@ -42,13 +43,18 @@ func main() {
 
 	// Initialize repositories
 	orderRepo := repository.NewOrderRepository(db)
+	reviewRepo := repository.NewReviewRepository(db)
 
 	// Initialize use cases
 	orderUseCase := usecase.NewOrderUseCase(orderRepo)
+	reviewUseCase := usecase.NewReviewUseCase(reviewRepo, orderRepo)
 
 	// Initialize handlers
 	orderHandler := handler.NewOrderHandler(orderUseCase)
-	grpcHandler := handler.NewGRPCHandler(orderUseCase)
+	reviewHandler := handler.NewReviewHandler(reviewUseCase)
+
+	// Create backoffice gRPC server instance
+	backofficeServer := backoffice.NewServer(orderUseCase, reviewUseCase)
 
 	// Set up Gin router
 	gin.SetMode(gin.ReleaseMode)
@@ -66,7 +72,7 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "up", "service": cfg.Server.Name})
 	})
 
-	// Register order routes
+	// Register routes
 	v1 := router.Group("/api/v1")
 	{
 		orders := v1.Group("/orders")
@@ -75,6 +81,14 @@ func main() {
 			orders.GET("/:id", orderHandler.GetOrderByID)
 			orders.PATCH("/:id/status", orderHandler.UpdateOrderStatus)
 			orders.GET("", orderHandler.ListUserOrders)
+			orders.GET("/:orderId/reviews", reviewHandler.GetReviewsByOrderID)
+		}
+
+		reviews := v1.Group("/reviews")
+		{
+			reviews.POST("", reviewHandler.CreateReview)
+			reviews.GET("/:id", reviewHandler.GetReviewByID)
+			reviews.DELETE("/:id", reviewHandler.DeleteReview)
 		}
 	}
 
@@ -85,7 +99,7 @@ func main() {
 	// Start the gRPC server
 	grpcAddr := fmt.Sprintf(":%d", cfg.Server.GRPCPort)
 	grpcServer := grpc.NewServer()
-	pb.RegisterOrderServiceServer(grpcServer, grpcHandler)
+	pb.RegisterOrderServiceServer(grpcServer, backofficeServer)
 
 	grpcListener, err := net.Listen("tcp", grpcAddr)
 	if err != nil {

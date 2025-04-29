@@ -12,3 +12,10 @@ type OrderUseCase interface {
 	UpdateOrderStatus(id uuid.UUID, request model.UpdateOrderStatusRequest) (*model.Order, error)
 	ListUserOrders(userID uuid.UUID, page, pageSize int) ([]model.Order, int64, error)
 }
+
+type ReviewUseCase interface {
+	CreateReview(request model.CreateReviewRequest) (*model.Review, error)
+	GetReviewByID(id uuid.UUID) (*model.Review, error)
+	GetReviewsByOrderID(orderID uuid.UUID) ([]model.Review, error)
+	DeleteReview(id uuid.UUID) error
+}

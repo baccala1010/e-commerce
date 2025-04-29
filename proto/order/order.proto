@@ -14,6 +14,11 @@ service OrderService {
   rpc ProcessPayment(ProcessPaymentRequest) returns (PaymentResponse);
   rpc GetPaymentByID(GetPaymentRequest) returns (PaymentResponse);
   rpc UpdatePaymentStatus(UpdatePaymentStatusRequest) returns (PaymentResponse);
+
+  rpc CreateReview(CreateReviewRequest) returns (ReviewResponse);
+  rpc GetReview(GetReviewRequest) returns (ReviewResponse);
+  rpc GetOrderReviews(GetOrderReviewsRequest) returns (GetOrderReviewsResponse);
+  rpc DeleteReview(DeleteReviewRequest) returns (google.protobuf.Empty);
 }
 
 // Order status enum
@@ -42,6 +47,16 @@ enum PaymentMethod {
   PAYMENT_METHOD_DEBIT_CARD = 2;
   PAYMENT_METHOD_PAYPAL = 3;
   PAYMENT_METHOD_BANK_WIRE = 4;
+}
+
+// Rating enum
+enum Rating {
+    RATING_UNSPECIFIED = 0;
+    RATING_ONE = 1;
+    RATING_TWO = 2;
+    RATING_THREE = 3;
+    RATING_FOUR = 4;
+    RATING_FIVE = 5;
 }
 
 // Order messages
@@ -127,4 +142,42 @@ message UpdatePaymentStatusRequest {
 
 message PaymentResponse {
   Payment payment = 1;
+}
+
+// Review messages
+
+message Review {
+  string id = 1;
+  string order_id = 2;
+  string user_id = 3;
+  Rating rating = 4;
+  string description = 5;
+  google.protobuf.Timestamp create_at = 6;
+}
+
+message CreateReviewRequest {
+  string order_id = 1;
+  string user_id = 2;
+  Rating rating = 3;
+  string description = 4;
+}
+
+message GetReviewRequest {
+  string id = 1;
+}
+
+message GetOrderReviewsRequest {
+  string order_id = 1;
+}
+
+message GetOrderReviewsResponse {
+  repeated Review reviews = 1;
+}
+
+message DeleteReviewRequest {
+  string id = 1;
+}
+
+message ReviewResponse {
+  Review review = 1;
 }

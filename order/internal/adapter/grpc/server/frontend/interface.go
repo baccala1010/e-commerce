@@ -16,6 +16,12 @@ type OrderServiceClient interface {
 	ProcessPayment(orderID string, method pb.PaymentMethod) (*pb.Payment, error)
 	GetPaymentByID(paymentID string) (*pb.Payment, error)
 	UpdatePaymentStatus(paymentID string, status pb.PaymentStatus, transactionID string) (*pb.Payment, error)
+
+	// Review methods
+	CreateReview(orderID string, rating int32, comment string) (*pb.Review, error)
+	GetReviewByID(reviewID string) (*pb.Review, error)
+	GetReviewsByOrderID(orderID string) ([]*pb.Review, error)
+	DeleteReview(reviewID string) error
 }
 
 // ShippingInfo contains shipping details for an order

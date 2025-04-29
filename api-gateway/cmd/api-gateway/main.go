@@ -3,19 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/baccala1010/e-commerce/api-gateway/internal/handler"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/baccala1010/e-commerce/api-gateway/internal/adapter/grpc/client/inventory"
-	"github.com/baccala1010/e-commerce/api-gateway/internal/adapter/grpc/client/order"
 	"github.com/baccala1010/e-commerce/api-gateway/internal/app"
 	"github.com/baccala1010/e-commerce/api-gateway/internal/config"
-	"github.com/baccala1010/e-commerce/api-gateway/internal/handler"
 	"github.com/baccala1010/e-commerce/api-gateway/internal/middleware"
-	"github.com/baccala1010/e-commerce/api-gateway/pkg/grpcconn"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -44,26 +41,7 @@ func main() {
 	// Set up logging
 	app.SetupLogging(cfg)
 
-	// Initialize gRPC connection manager
-	connManager := grpcconn.NewConnectionManager()
-	defer connManager.Close()
-
-	// Initialize gRPC clients
-	inventoryClient, err := inventory.NewClient(ctx, connManager, cfg)
-	if err != nil {
-		logrus.Fatalf("Failed to create inventory client: %v", err)
-	}
-
-	orderClient, err := order.NewClient(ctx, connManager, cfg)
-	if err != nil {
-		logrus.Fatalf("Failed to create order client: %v", err)
-	}
-
-	// Initialize HTTP handlers
-	inventoryHandler := handler.NewInventoryHandler(inventoryClient)
-	orderHandler := handler.NewOrderHandler(orderClient)
-
-	// Initialize service proxy for backward compatibility
+	// Initialize service proxy
 	proxy := handler.NewServiceProxy(cfg)
 
 	// Set up Gin router
@@ -86,35 +64,41 @@ func main() {
 	})
 
 	// Register inventory routes
-	router.GET("/products", inventoryHandler.ListProducts)
-	router.GET("/products/:id", inventoryHandler.GetProduct)
-	router.POST("/products", inventoryHandler.CreateProduct)
-	router.PATCH("/products/:id", inventoryHandler.UpdateProduct)
-	router.DELETE("/products/:id", inventoryHandler.DeleteProduct)
-	router.GET("/products/promotions", inventoryHandler.GetAllProductsWithPromotion)
+	router.GET("/products", proxy.ProxyInventory())
+	router.GET("/products/:id", proxy.ProxyInventory())
+	router.POST("/products", proxy.ProxyInventory())
+	router.PATCH("/products/:id", proxy.ProxyInventory())
+	router.DELETE("/products/:id", proxy.ProxyInventory())
+	router.GET("/products/promotions", proxy.ProxyInventory())
 
-	router.GET("/categories", inventoryHandler.ListCategories)
-	router.GET("/categories/:id", inventoryHandler.GetCategory)
-	router.POST("/categories", inventoryHandler.CreateCategory)
-	router.PATCH("/categories/:id", inventoryHandler.UpdateCategory)
-	router.DELETE("/categories/:id", inventoryHandler.DeleteCategory)
+	router.GET("/categories", proxy.ProxyInventory())
+	router.GET("/categories/:id", proxy.ProxyInventory())
+	router.POST("/categories", proxy.ProxyInventory())
+	router.PATCH("/categories/:id", proxy.ProxyInventory())
+	router.DELETE("/categories/:id", proxy.ProxyInventory())
 
 	// Register discount routes
-	router.GET("/discounts/:id", inventoryHandler.GetDiscountByID)
-	router.POST("/discounts", inventoryHandler.CreateDiscount)
-	router.PATCH("/discounts/:id", inventoryHandler.UpdateDiscount)
-	router.DELETE("/discounts/:id", inventoryHandler.DeleteDiscount)
-	router.GET("/discounts/:id/products", inventoryHandler.GetProductsByDiscountID)
+	router.GET("/discounts/:id", proxy.ProxyInventory())
+	router.POST("/discounts", proxy.ProxyInventory())
+	router.PATCH("/discounts/:id", proxy.ProxyInventory())
+	router.DELETE("/discounts/:id", proxy.ProxyInventory())
+	router.GET("/discounts/:id/products", proxy.ProxyInventory())
 
 	// Register order routes
-	router.GET("/orders", orderHandler.ListUserOrders)
-	router.GET("/orders/:id", orderHandler.GetOrder)
-	router.POST("/orders", orderHandler.CreateOrder)
-	router.PATCH("/orders/:id", orderHandler.UpdateOrderStatus)
-	router.POST("/orders/:id/payment", orderHandler.ProcessPayment)
+	router.GET("/orders", proxy.ProxyOrder())
+	router.GET("/orders/:id", proxy.ProxyOrder())
+	router.POST("/orders", proxy.ProxyOrder())
+	router.PATCH("/orders/:id", proxy.ProxyOrder())
+	router.POST("/orders/:id/payment", proxy.ProxyOrder())
+	router.GET("/orders/:orderId/reviews", proxy.ProxyOrder())
 
-	router.GET("/payments/:id", orderHandler.GetPayment)
-	router.PATCH("/payments/:id", orderHandler.UpdatePaymentStatus)
+	router.GET("/payments/:id", proxy.ProxyOrder())
+	router.PATCH("/payments/:id", proxy.ProxyOrder())
+
+	// Register review routes
+	router.POST("/reviews", proxy.ProxyOrder())
+	router.GET("/reviews/:id", proxy.ProxyOrder())
+	router.DELETE("/reviews/:id", proxy.ProxyOrder())
 
 	// Register legacy proxy routes for backward compatibility
 	inventoryGroup := router.Group("/inventory")

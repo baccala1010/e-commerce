@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/baccala1010/e-commerce/inventory/internal/adapter/grpc/server/backoffice"
 	"github.com/baccala1010/e-commerce/inventory/internal/app"
 	"github.com/baccala1010/e-commerce/inventory/internal/config"
 	"github.com/baccala1010/e-commerce/inventory/internal/database"
@@ -60,7 +61,8 @@ func main() {
 	productHandler := handler.NewProductHandler(productService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	discountHandler := handler.NewDiscountHandler(discountService)
-	grpcHandler := handler.NewGRPCHandler(productUseCase, categoryUseCase, discountUseCase)
+	// Create backoffice gRPC server instance
+	backofficeServer := backoffice.NewServer(productUseCase, categoryUseCase, discountUseCase)
 
 	// Set up Gin router
 	gin.SetMode(gin.ReleaseMode)
@@ -121,7 +123,7 @@ func main() {
 	// Start the gRPC server
 	grpcAddr := fmt.Sprintf(":%d", cfg.Server.GRPCPort)
 	grpcServer := grpc.NewServer()
-	pb.RegisterInventoryServiceServer(grpcServer, grpcHandler)
+	pb.RegisterInventoryServiceServer(grpcServer, backofficeServer)
 
 	grpcListener, err := net.Listen("tcp", grpcAddr)
 	if err != nil {

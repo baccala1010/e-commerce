@@ -9,7 +9,7 @@ package pb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/known/emptypb"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -192,6 +192,65 @@ func (x PaymentMethod) Number() protoreflect.EnumNumber {
 // Deprecated: Use PaymentMethod.Descriptor instead.
 func (PaymentMethod) EnumDescriptor() ([]byte, []int) {
 	return file_order_order_proto_rawDescGZIP(), []int{2}
+}
+
+// Rating enum
+type Rating int32
+
+const (
+	Rating_RATING_UNSPECIFIED Rating = 0
+	Rating_RATING_ONE         Rating = 1
+	Rating_RATING_TWO         Rating = 2
+	Rating_RATING_THREE       Rating = 3
+	Rating_RATING_FOUR        Rating = 4
+	Rating_RATING_FIVE        Rating = 5
+)
+
+// Enum value maps for Rating.
+var (
+	Rating_name = map[int32]string{
+		0: "RATING_UNSPECIFIED",
+		1: "RATING_ONE",
+		2: "RATING_TWO",
+		3: "RATING_THREE",
+		4: "RATING_FOUR",
+		5: "RATING_FIVE",
+	}
+	Rating_value = map[string]int32{
+		"RATING_UNSPECIFIED": 0,
+		"RATING_ONE":         1,
+		"RATING_TWO":         2,
+		"RATING_THREE":       3,
+		"RATING_FOUR":        4,
+		"RATING_FIVE":        5,
+	}
+)
+
+func (x Rating) Enum() *Rating {
+	p := new(Rating)
+	*p = x
+	return p
+}
+
+func (x Rating) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Rating) Descriptor() protoreflect.EnumDescriptor {
+	return file_order_order_proto_enumTypes[3].Descriptor()
+}
+
+func (Rating) Type() protoreflect.EnumType {
+	return &file_order_order_proto_enumTypes[3]
+}
+
+func (x Rating) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Rating.Descriptor instead.
+func (Rating) EnumDescriptor() ([]byte, []int) {
+	return file_order_order_proto_rawDescGZIP(), []int{3}
 }
 
 // Order messages
@@ -1016,6 +1075,378 @@ func (x *PaymentResponse) GetPayment() *Payment {
 	return nil
 }
 
+type Review struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	OrderId       string                 `protobuf:"bytes,2,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Rating        Rating                 `protobuf:"varint,4,opt,name=rating,proto3,enum=order.Rating" json:"rating,omitempty"`
+	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	CreateAt      *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=create_at,json=createAt,proto3" json:"create_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Review) Reset() {
+	*x = Review{}
+	mi := &file_order_order_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Review) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Review) ProtoMessage() {}
+
+func (x *Review) ProtoReflect() protoreflect.Message {
+	mi := &file_order_order_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Review.ProtoReflect.Descriptor instead.
+func (*Review) Descriptor() ([]byte, []int) {
+	return file_order_order_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *Review) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Review) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *Review) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *Review) GetRating() Rating {
+	if x != nil {
+		return x.Rating
+	}
+	return Rating_RATING_UNSPECIFIED
+}
+
+func (x *Review) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Review) GetCreateAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreateAt
+	}
+	return nil
+}
+
+type CreateReviewRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Rating        Rating                 `protobuf:"varint,3,opt,name=rating,proto3,enum=order.Rating" json:"rating,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateReviewRequest) Reset() {
+	*x = CreateReviewRequest{}
+	mi := &file_order_order_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateReviewRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateReviewRequest) ProtoMessage() {}
+
+func (x *CreateReviewRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_order_order_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateReviewRequest.ProtoReflect.Descriptor instead.
+func (*CreateReviewRequest) Descriptor() ([]byte, []int) {
+	return file_order_order_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *CreateReviewRequest) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *CreateReviewRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *CreateReviewRequest) GetRating() Rating {
+	if x != nil {
+		return x.Rating
+	}
+	return Rating_RATING_UNSPECIFIED
+}
+
+func (x *CreateReviewRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type GetReviewRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetReviewRequest) Reset() {
+	*x = GetReviewRequest{}
+	mi := &file_order_order_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetReviewRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetReviewRequest) ProtoMessage() {}
+
+func (x *GetReviewRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_order_order_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetReviewRequest.ProtoReflect.Descriptor instead.
+func (*GetReviewRequest) Descriptor() ([]byte, []int) {
+	return file_order_order_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GetReviewRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetOrderReviewsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOrderReviewsRequest) Reset() {
+	*x = GetOrderReviewsRequest{}
+	mi := &file_order_order_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOrderReviewsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOrderReviewsRequest) ProtoMessage() {}
+
+func (x *GetOrderReviewsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_order_order_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOrderReviewsRequest.ProtoReflect.Descriptor instead.
+func (*GetOrderReviewsRequest) Descriptor() ([]byte, []int) {
+	return file_order_order_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetOrderReviewsRequest) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+type GetOrderReviewsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Reviews       []*Review              `protobuf:"bytes,1,rep,name=reviews,proto3" json:"reviews,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOrderReviewsResponse) Reset() {
+	*x = GetOrderReviewsResponse{}
+	mi := &file_order_order_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOrderReviewsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOrderReviewsResponse) ProtoMessage() {}
+
+func (x *GetOrderReviewsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_order_order_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOrderReviewsResponse.ProtoReflect.Descriptor instead.
+func (*GetOrderReviewsResponse) Descriptor() ([]byte, []int) {
+	return file_order_order_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetOrderReviewsResponse) GetReviews() []*Review {
+	if x != nil {
+		return x.Reviews
+	}
+	return nil
+}
+
+type DeleteReviewRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteReviewRequest) Reset() {
+	*x = DeleteReviewRequest{}
+	mi := &file_order_order_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteReviewRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteReviewRequest) ProtoMessage() {}
+
+func (x *DeleteReviewRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_order_order_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteReviewRequest.ProtoReflect.Descriptor instead.
+func (*DeleteReviewRequest) Descriptor() ([]byte, []int) {
+	return file_order_order_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *DeleteReviewRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type ReviewResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Review        *Review                `protobuf:"bytes,1,opt,name=review,proto3" json:"review,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReviewResponse) Reset() {
+	*x = ReviewResponse{}
+	mi := &file_order_order_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReviewResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReviewResponse) ProtoMessage() {}
+
+func (x *ReviewResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_order_order_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReviewResponse.ProtoReflect.Descriptor instead.
+func (*ReviewResponse) Descriptor() ([]byte, []int) {
+	return file_order_order_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ReviewResponse) GetReview() *Review {
+	if x != nil {
+		return x.Review
+	}
+	return nil
+}
+
 var File_order_order_proto protoreflect.FileDescriptor
 
 const file_order_order_proto_rawDesc = "" +
@@ -1082,7 +1513,29 @@ const file_order_order_proto_rawDesc = "" +
 	"\x06status\x18\x02 \x01(\x0e2\x14.order.PaymentStatusR\x06status\x12%\n" +
 	"\x0etransaction_id\x18\x03 \x01(\tR\rtransactionId\";\n" +
 	"\x0fPaymentResponse\x12(\n" +
-	"\apayment\x18\x01 \x01(\v2\x0e.order.PaymentR\apayment*\xae\x01\n" +
+	"\apayment\x18\x01 \x01(\v2\x0e.order.PaymentR\apayment\"\xce\x01\n" +
+	"\x06Review\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
+	"\border_id\x18\x02 \x01(\tR\aorderId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12%\n" +
+	"\x06rating\x18\x04 \x01(\x0e2\r.order.RatingR\x06rating\x12 \n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\x127\n" +
+	"\tcreate_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\bcreateAt\"\x92\x01\n" +
+	"\x13CreateReviewRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12%\n" +
+	"\x06rating\x18\x03 \x01(\x0e2\r.order.RatingR\x06rating\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\"\"\n" +
+	"\x10GetReviewRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"3\n" +
+	"\x16GetOrderReviewsRequest\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\"B\n" +
+	"\x17GetOrderReviewsResponse\x12'\n" +
+	"\areviews\x18\x01 \x03(\v2\r.order.ReviewR\areviews\"%\n" +
+	"\x13DeleteReviewRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"7\n" +
+	"\x0eReviewResponse\x12%\n" +
+	"\x06review\x18\x01 \x01(\v2\r.order.ReviewR\x06review*\xae\x01\n" +
 	"\vOrderStatus\x12\x1c\n" +
 	"\x18ORDER_STATUS_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14ORDER_STATUS_PENDING\x10\x01\x12\x15\n" +
@@ -1101,7 +1554,16 @@ const file_order_order_proto_rawDesc = "" +
 	"\x1aPAYMENT_METHOD_CREDIT_CARD\x10\x01\x12\x1d\n" +
 	"\x19PAYMENT_METHOD_DEBIT_CARD\x10\x02\x12\x19\n" +
 	"\x15PAYMENT_METHOD_PAYPAL\x10\x03\x12\x1c\n" +
-	"\x18PAYMENT_METHOD_BANK_WIRE\x10\x042\x81\x04\n" +
+	"\x18PAYMENT_METHOD_BANK_WIRE\x10\x04*t\n" +
+	"\x06Rating\x12\x16\n" +
+	"\x12RATING_UNSPECIFIED\x10\x00\x12\x0e\n" +
+	"\n" +
+	"RATING_ONE\x10\x01\x12\x0e\n" +
+	"\n" +
+	"RATING_TWO\x10\x02\x12\x10\n" +
+	"\fRATING_THREE\x10\x03\x12\x0f\n" +
+	"\vRATING_FOUR\x10\x04\x12\x0f\n" +
+	"\vRATING_FIVE\x10\x052\x97\x06\n" +
 	"\fOrderService\x12>\n" +
 	"\vCreateOrder\x12\x19.order.CreateOrderRequest\x1a\x14.order.OrderResponse\x12<\n" +
 	"\fGetOrderByID\x12\x16.order.GetOrderRequest\x1a\x14.order.OrderResponse\x12J\n" +
@@ -1109,7 +1571,11 @@ const file_order_order_proto_rawDesc = "" +
 	"\x0eListUserOrders\x12\x1c.order.ListUserOrdersRequest\x1a\x19.order.ListOrdersResponse\x12F\n" +
 	"\x0eProcessPayment\x12\x1c.order.ProcessPaymentRequest\x1a\x16.order.PaymentResponse\x12B\n" +
 	"\x0eGetPaymentByID\x12\x18.order.GetPaymentRequest\x1a\x16.order.PaymentResponse\x12P\n" +
-	"\x13UpdatePaymentStatus\x12!.order.UpdatePaymentStatusRequest\x1a\x16.order.PaymentResponseB0Z.github.com/baccala1010/e-commerce/order/pkg/pbb\x06proto3"
+	"\x13UpdatePaymentStatus\x12!.order.UpdatePaymentStatusRequest\x1a\x16.order.PaymentResponse\x12A\n" +
+	"\fCreateReview\x12\x1a.order.CreateReviewRequest\x1a\x15.order.ReviewResponse\x12;\n" +
+	"\tGetReview\x12\x17.order.GetReviewRequest\x1a\x15.order.ReviewResponse\x12P\n" +
+	"\x0fGetOrderReviews\x12\x1d.order.GetOrderReviewsRequest\x1a\x1e.order.GetOrderReviewsResponse\x12B\n" +
+	"\fDeleteReview\x12\x1a.order.DeleteReviewRequest\x1a\x16.google.protobuf.EmptyB0Z.github.com/baccala1010/e-commerce/order/pkg/pbb\x06proto3"
 
 var (
 	file_order_order_proto_rawDescOnce sync.Once
@@ -1123,64 +1589,86 @@ func file_order_order_proto_rawDescGZIP() []byte {
 	return file_order_order_proto_rawDescData
 }
 
-var file_order_order_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_order_order_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_order_order_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_order_order_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_order_order_proto_goTypes = []any{
 	(OrderStatus)(0),                   // 0: order.OrderStatus
 	(PaymentStatus)(0),                 // 1: order.PaymentStatus
 	(PaymentMethod)(0),                 // 2: order.PaymentMethod
-	(*Order)(nil),                      // 3: order.Order
-	(*CreateOrderRequest)(nil),         // 4: order.CreateOrderRequest
-	(*PaymentInfo)(nil),                // 5: order.PaymentInfo
-	(*GetOrderRequest)(nil),            // 6: order.GetOrderRequest
-	(*UpdateOrderStatusRequest)(nil),   // 7: order.UpdateOrderStatusRequest
-	(*ListUserOrdersRequest)(nil),      // 8: order.ListUserOrdersRequest
-	(*ListOrdersResponse)(nil),         // 9: order.ListOrdersResponse
-	(*OrderResponse)(nil),              // 10: order.OrderResponse
-	(*Payment)(nil),                    // 11: order.Payment
-	(*ProcessPaymentRequest)(nil),      // 12: order.ProcessPaymentRequest
-	(*GetPaymentRequest)(nil),          // 13: order.GetPaymentRequest
-	(*UpdatePaymentStatusRequest)(nil), // 14: order.UpdatePaymentStatusRequest
-	(*PaymentResponse)(nil),            // 15: order.PaymentResponse
-	(*timestamppb.Timestamp)(nil),      // 16: google.protobuf.Timestamp
+	(Rating)(0),                        // 3: order.Rating
+	(*Order)(nil),                      // 4: order.Order
+	(*CreateOrderRequest)(nil),         // 5: order.CreateOrderRequest
+	(*PaymentInfo)(nil),                // 6: order.PaymentInfo
+	(*GetOrderRequest)(nil),            // 7: order.GetOrderRequest
+	(*UpdateOrderStatusRequest)(nil),   // 8: order.UpdateOrderStatusRequest
+	(*ListUserOrdersRequest)(nil),      // 9: order.ListUserOrdersRequest
+	(*ListOrdersResponse)(nil),         // 10: order.ListOrdersResponse
+	(*OrderResponse)(nil),              // 11: order.OrderResponse
+	(*Payment)(nil),                    // 12: order.Payment
+	(*ProcessPaymentRequest)(nil),      // 13: order.ProcessPaymentRequest
+	(*GetPaymentRequest)(nil),          // 14: order.GetPaymentRequest
+	(*UpdatePaymentStatusRequest)(nil), // 15: order.UpdatePaymentStatusRequest
+	(*PaymentResponse)(nil),            // 16: order.PaymentResponse
+	(*Review)(nil),                     // 17: order.Review
+	(*CreateReviewRequest)(nil),        // 18: order.CreateReviewRequest
+	(*GetReviewRequest)(nil),           // 19: order.GetReviewRequest
+	(*GetOrderReviewsRequest)(nil),     // 20: order.GetOrderReviewsRequest
+	(*GetOrderReviewsResponse)(nil),    // 21: order.GetOrderReviewsResponse
+	(*DeleteReviewRequest)(nil),        // 22: order.DeleteReviewRequest
+	(*ReviewResponse)(nil),             // 23: order.ReviewResponse
+	(*timestamppb.Timestamp)(nil),      // 24: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),              // 25: google.protobuf.Empty
 }
 var file_order_order_proto_depIdxs = []int32{
 	0,  // 0: order.Order.status:type_name -> order.OrderStatus
-	11, // 1: order.Order.payment:type_name -> order.Payment
-	16, // 2: order.Order.created_at:type_name -> google.protobuf.Timestamp
-	16, // 3: order.Order.updated_at:type_name -> google.protobuf.Timestamp
-	5,  // 4: order.CreateOrderRequest.payment:type_name -> order.PaymentInfo
+	12, // 1: order.Order.payment:type_name -> order.Payment
+	24, // 2: order.Order.created_at:type_name -> google.protobuf.Timestamp
+	24, // 3: order.Order.updated_at:type_name -> google.protobuf.Timestamp
+	6,  // 4: order.CreateOrderRequest.payment:type_name -> order.PaymentInfo
 	2,  // 5: order.PaymentInfo.method:type_name -> order.PaymentMethod
 	0,  // 6: order.UpdateOrderStatusRequest.status:type_name -> order.OrderStatus
-	3,  // 7: order.ListOrdersResponse.orders:type_name -> order.Order
-	3,  // 8: order.OrderResponse.order:type_name -> order.Order
+	4,  // 7: order.ListOrdersResponse.orders:type_name -> order.Order
+	4,  // 8: order.OrderResponse.order:type_name -> order.Order
 	2,  // 9: order.Payment.method:type_name -> order.PaymentMethod
 	1,  // 10: order.Payment.status:type_name -> order.PaymentStatus
-	16, // 11: order.Payment.payment_date:type_name -> google.protobuf.Timestamp
-	16, // 12: order.Payment.created_at:type_name -> google.protobuf.Timestamp
-	16, // 13: order.Payment.updated_at:type_name -> google.protobuf.Timestamp
+	24, // 11: order.Payment.payment_date:type_name -> google.protobuf.Timestamp
+	24, // 12: order.Payment.created_at:type_name -> google.protobuf.Timestamp
+	24, // 13: order.Payment.updated_at:type_name -> google.protobuf.Timestamp
 	2,  // 14: order.ProcessPaymentRequest.method:type_name -> order.PaymentMethod
 	1,  // 15: order.UpdatePaymentStatusRequest.status:type_name -> order.PaymentStatus
-	11, // 16: order.PaymentResponse.payment:type_name -> order.Payment
-	4,  // 17: order.OrderService.CreateOrder:input_type -> order.CreateOrderRequest
-	6,  // 18: order.OrderService.GetOrderByID:input_type -> order.GetOrderRequest
-	7,  // 19: order.OrderService.UpdateOrderStatus:input_type -> order.UpdateOrderStatusRequest
-	8,  // 20: order.OrderService.ListUserOrders:input_type -> order.ListUserOrdersRequest
-	12, // 21: order.OrderService.ProcessPayment:input_type -> order.ProcessPaymentRequest
-	13, // 22: order.OrderService.GetPaymentByID:input_type -> order.GetPaymentRequest
-	14, // 23: order.OrderService.UpdatePaymentStatus:input_type -> order.UpdatePaymentStatusRequest
-	10, // 24: order.OrderService.CreateOrder:output_type -> order.OrderResponse
-	10, // 25: order.OrderService.GetOrderByID:output_type -> order.OrderResponse
-	10, // 26: order.OrderService.UpdateOrderStatus:output_type -> order.OrderResponse
-	9,  // 27: order.OrderService.ListUserOrders:output_type -> order.ListOrdersResponse
-	15, // 28: order.OrderService.ProcessPayment:output_type -> order.PaymentResponse
-	15, // 29: order.OrderService.GetPaymentByID:output_type -> order.PaymentResponse
-	15, // 30: order.OrderService.UpdatePaymentStatus:output_type -> order.PaymentResponse
-	24, // [24:31] is the sub-list for method output_type
-	17, // [17:24] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	12, // 16: order.PaymentResponse.payment:type_name -> order.Payment
+	3,  // 17: order.Review.rating:type_name -> order.Rating
+	24, // 18: order.Review.create_at:type_name -> google.protobuf.Timestamp
+	3,  // 19: order.CreateReviewRequest.rating:type_name -> order.Rating
+	17, // 20: order.GetOrderReviewsResponse.reviews:type_name -> order.Review
+	17, // 21: order.ReviewResponse.review:type_name -> order.Review
+	5,  // 22: order.OrderService.CreateOrder:input_type -> order.CreateOrderRequest
+	7,  // 23: order.OrderService.GetOrderByID:input_type -> order.GetOrderRequest
+	8,  // 24: order.OrderService.UpdateOrderStatus:input_type -> order.UpdateOrderStatusRequest
+	9,  // 25: order.OrderService.ListUserOrders:input_type -> order.ListUserOrdersRequest
+	13, // 26: order.OrderService.ProcessPayment:input_type -> order.ProcessPaymentRequest
+	14, // 27: order.OrderService.GetPaymentByID:input_type -> order.GetPaymentRequest
+	15, // 28: order.OrderService.UpdatePaymentStatus:input_type -> order.UpdatePaymentStatusRequest
+	18, // 29: order.OrderService.CreateReview:input_type -> order.CreateReviewRequest
+	19, // 30: order.OrderService.GetReview:input_type -> order.GetReviewRequest
+	20, // 31: order.OrderService.GetOrderReviews:input_type -> order.GetOrderReviewsRequest
+	22, // 32: order.OrderService.DeleteReview:input_type -> order.DeleteReviewRequest
+	11, // 33: order.OrderService.CreateOrder:output_type -> order.OrderResponse
+	11, // 34: order.OrderService.GetOrderByID:output_type -> order.OrderResponse
+	11, // 35: order.OrderService.UpdateOrderStatus:output_type -> order.OrderResponse
+	10, // 36: order.OrderService.ListUserOrders:output_type -> order.ListOrdersResponse
+	16, // 37: order.OrderService.ProcessPayment:output_type -> order.PaymentResponse
+	16, // 38: order.OrderService.GetPaymentByID:output_type -> order.PaymentResponse
+	16, // 39: order.OrderService.UpdatePaymentStatus:output_type -> order.PaymentResponse
+	23, // 40: order.OrderService.CreateReview:output_type -> order.ReviewResponse
+	23, // 41: order.OrderService.GetReview:output_type -> order.ReviewResponse
+	21, // 42: order.OrderService.GetOrderReviews:output_type -> order.GetOrderReviewsResponse
+	25, // 43: order.OrderService.DeleteReview:output_type -> google.protobuf.Empty
+	33, // [33:44] is the sub-list for method output_type
+	22, // [22:33] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_order_order_proto_init() }
@@ -1193,8 +1681,8 @@ func file_order_order_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_order_order_proto_rawDesc), len(file_order_order_proto_rawDesc)),
-			NumEnums:      3,
-			NumMessages:   13,
+			NumEnums:      4,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

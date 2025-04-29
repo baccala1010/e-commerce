@@ -130,3 +130,49 @@ func convertProtoPaymentMethodToModel(method pb.PaymentMethod) model.PaymentMeth
 		return model.PaymentMethodCreditCard
 	}
 }
+
+// Review conversion functions
+func convertReviewToProto(review *model.Review) *pb.Review {
+	return &pb.Review{
+		Id:          review.ID.String(),
+		OrderId:     review.OrderID.String(),
+		UserId:      review.UserID.String(),
+		Rating:      convertModelRatingToProto(review.Rating),
+		Description: review.Description,
+		CreateAt:    timestamppb.New(review.CreatedAt),
+	}
+}
+
+func convertModelRatingToProto(rating model.Rating) pb.Rating {
+	switch rating {
+	case model.RatingOne:
+		return pb.Rating_RATING_ONE
+	case model.RatingTwo:
+		return pb.Rating_RATING_TWO
+	case model.RatingThree:
+		return pb.Rating_RATING_THREE
+	case model.RatingFour:
+		return pb.Rating_RATING_FOUR
+	case model.RatingFive:
+		return pb.Rating_RATING_FIVE
+	default:
+		return pb.Rating_RATING_UNSPECIFIED
+	}
+}
+
+func convertProtoRatingToModel(rating pb.Rating) model.Rating {
+	switch rating {
+	case pb.Rating_RATING_ONE:
+		return model.RatingOne
+	case pb.Rating_RATING_TWO:
+		return model.RatingTwo
+	case pb.Rating_RATING_THREE:
+		return model.RatingThree
+	case pb.Rating_RATING_FOUR:
+		return model.RatingFour
+	case pb.Rating_RATING_FIVE:
+		return model.RatingFive
+	default:
+		return model.RatingOne
+	}
+}

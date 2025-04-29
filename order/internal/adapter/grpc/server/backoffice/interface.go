@@ -13,12 +13,14 @@ type OrderServiceServer interface {
 // Server represents the gRPC server for order service
 type Server struct {
 	pb.UnimplementedOrderServiceServer
-	orderUseCase usecase.OrderUseCase
+	orderUseCase  usecase.OrderUseCase
+	reviewUseCase usecase.ReviewUseCase
 }
 
 // NewServer creates a new order gRPC server
-func NewServer(orderUseCase usecase.OrderUseCase) *Server {
+func NewServer(orderUseCase usecase.OrderUseCase, reviewUseCase usecase.ReviewUseCase) *Server {
 	return &Server{
-		orderUseCase: orderUseCase,
+		orderUseCase:  orderUseCase,
+		reviewUseCase: reviewUseCase,
 	}
 }
