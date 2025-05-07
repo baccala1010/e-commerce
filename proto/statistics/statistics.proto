@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package statistics;
+option go_package = "github.com/baccala1010/e-commerce/statistics/pkg/pb";
+
+// User order statistics
+message UserOrderStatisticsRequest {
+  string user_id = 1;
+  string time_period = 2; // daily, weekly, monthly, yearly
+}
+
+message UserOrderStatisticsResponse {
+  string user_id = 1;
+  int32 total_orders = 2;
+  float total_spent = 3;
+  string most_active_time = 4; // Time of day user usually orders
+  repeated OrdersPerDay orders_per_day = 5;
+  repeated ProductCategory favorite_categories = 6;
+}
+
+message OrdersPerDay {
+  string day = 1;
+  int32 count = 2;
+}
+
+message ProductCategory {
+  string category_name = 1;
+  int32 order_count = 2;
+}
+
+// General user statistics
+message UserStatisticsRequest {
+  string time_period = 1; // daily, weekly, monthly, yearly
+}
+
+message UserStatisticsResponse {
+  int32 total_users = 1;
+  int32 active_users = 2;
+  int32 new_users = 3;
+  float average_orders_per_user = 4;
+  repeated ActiveHour peak_hours = 5;
+}
+
+message ActiveHour {
+  int32 hour = 1;
+  int32 activity_count = 2;
+}
+
+service StatisticsService {
+  rpc GetUserOrdersStatistics(UserOrderStatisticsRequest) returns (UserOrderStatisticsResponse);
+  rpc GetUserStatistics(UserStatisticsRequest) returns (UserStatisticsResponse);
+}
