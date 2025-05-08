@@ -27,10 +27,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      kafka:
+        condition: service_healthy
     ports:
       - "8081:8081"
       - "9081:9081"
     restart: on-failure
+    environment:
+      - DOCKER=true
 
   # Order service
   order-service:
@@ -43,10 +47,88 @@ services:
         condition: service_healthy
       inventory-service:
         condition: service_started
+      kafka:
+        condition: service_healthy
     ports:
-      - "8083:8083"
+      - "8082:8082"
       - "9082:9082"
     restart: on-failure
+    environment:
+      - DOCKER=true
+
+  # Statistics service
+  statistics-service:
+    build:
+      context: ./statistics
+      dockerfile: Dockerfile
+    container_name: e-commerce-statistics
+    depends_on:
+      statistics-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    restart: on-failure
+    environment:
+      - DOCKER=true
+
+  # Statistics database
+  statistics-db:
+    image: postgres:14-alpine
+    container_name: statistics-postgres
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=statistics_db
+    volumes:
+      - statistics_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Apache Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: e-commerce-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD-SHELL", "echo srvr | nc localhost 2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: e-commerce-kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # API Gateway
   api-gateway:
@@ -57,9 +139,13 @@ services:
     depends_on:
       - inventory-service
       - order-service
+      - statistics-service
     ports:
       - "8080:8080"
     restart: on-failure
+    environment:
+      - DOCKER=true
 
 volumes:
-  postgres_data: 
+  postgres_data:
+  statistics_db_data:
