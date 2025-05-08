@@ -1,0 +1,26 @@
+server:
+  host: "0.0.0.0"
+  port: "8083"
+  read_timeout: "5s"
+  write_timeout: "5s"
+
+db:
+  host: "statistics-db"
+  port: "5432"
+  user: "postgres"
+  password: "postgres"
+  name: "statistics_db"
+  ssl_mode: "disable"
+  max_connections: 5
+
+kafka:
+  bootstrap_servers: "kafka:9092"
+  consumer_group_id: "statistics-service"
+  topics:
+    order_events: "order-events"
+    product_events: "product-events"
+    user_events: "user-events"
+  auto_offset_reset: "earliest"
+
+logging:
+  level: "debug"
