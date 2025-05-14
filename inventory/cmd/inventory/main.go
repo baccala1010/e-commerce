@@ -19,6 +19,7 @@ import (
 	"github.com/baccala1010/e-commerce/inventory/internal/middleware"
 	"github.com/baccala1010/e-commerce/inventory/internal/repository"
 	"github.com/baccala1010/e-commerce/inventory/internal/usecase"
+	"github.com/baccala1010/e-commerce/inventory/pkg/kafka"
 	"github.com/baccala1010/e-commerce/inventory/pkg/pb"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -64,8 +65,18 @@ func main() {
 		productCache.StartPeriodicRefresh(12*time.Hour, cachedRepo.RefreshCache)
 	}
 
+	// Initialize Kafka producer
+	kafkaProducer, err := kafka.NewProducer(cfg.Kafka.BootstrapServers, cfg.Kafka.Topics.ProductEvents)
+	if err != nil {
+		logrus.Warnf("Failed to initialize Kafka producer: %v", err)
+		logrus.Warn("Events will not be published to Kafka")
+		kafkaProducer = nil
+	} else {
+		logrus.Info("Kafka producer initialized successfully")
+	}
+
 	// Initialize use cases
-	productUseCase := usecase.NewProductUseCase(productRepo, categoryRepo)
+	productUseCase := usecase.NewProductUseCase(productRepo, categoryRepo, kafkaProducer)
 	categoryUseCase := usecase.NewCategoryUseCase(categoryRepo)
 	discountUseCase := usecase.NewDiscountUseCase(discountRepo, productRepo)
 

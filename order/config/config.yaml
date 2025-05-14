@@ -17,5 +17,11 @@ database:
 inventory_service:
   base_url: "http://localhost:8081"
 
+kafka:
+  bootstrap_servers: "localhost:9092"
+  topics:
+    order_events: "order-events"
+    user_events: "user-events"
+
 logging:
   level: "debug" 

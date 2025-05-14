@@ -8,13 +8,11 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
-// Producer represents a Kafka producer
 type Producer struct {
 	producer  *kafka.Producer
 	topicName string
 }
 
-// NewProducer creates a new Kafka producer
 func NewProducer(bootstrapServers, topicName string) (*Producer, error) {
 	p, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": bootstrapServers,
@@ -23,7 +21,6 @@ func NewProducer(bootstrapServers, topicName string) (*Producer, error) {
 		return nil, fmt.Errorf("failed to create Kafka producer: %w", err)
 	}
 
-	// Start monitoring delivery reports
 	go func() {
 		for e := range p.Events() {
 			switch ev := e.(type) {
@@ -43,7 +40,6 @@ func NewProducer(bootstrapServers, topicName string) (*Producer, error) {
 	}, nil
 }
 
-// PublishEvent publishes an event to Kafka
 func (p *Producer) PublishEvent(key string, value []byte) error {
 	message := &kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &p.topicName, Partition: kafka.PartitionAny},
@@ -51,12 +47,10 @@ func (p *Producer) PublishEvent(key string, value []byte) error {
 		Value:          value,
 		Timestamp:      time.Now(),
 	}
-
 	return p.producer.Produce(message, nil)
 }
 
-// Close closes the Kafka producer
 func (p *Producer) Close() {
-	p.producer.Flush(5000) // Wait for any outstanding messages to be delivered
+	p.producer.Flush(5000)
 	p.producer.Close()
 }

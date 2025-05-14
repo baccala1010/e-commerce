@@ -280,8 +280,9 @@ func (r *orderRepository) GetHourlyDistribution(ctx context.Context, userID stri
 }
 
 // Time is a wrapper around time.Time for handling NULL times from the database
+// If you need a nullable time, use this struct, otherwise remove it if unused.
 type Time struct {
-	model.Time
+	time.Time
 	Valid bool
 }
 

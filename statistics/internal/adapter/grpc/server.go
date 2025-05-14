@@ -8,7 +8,7 @@ import (
 
 	"github.com/baccala1010/e-commerce/statistics/internal/config"
 	"github.com/baccala1010/e-commerce/statistics/internal/handler"
-	"github.com/baccala1010/e-commerce/statistics/pkg/pb"
+	"github.com/baccala1010/e-commerce/statistics/pkg/pb" // добавлен импорт pb
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -44,7 +44,7 @@ func NewServer(cfg *config.Config, statisticsHandler *handler.StatisticsHandler)
 // Start starts the gRPC server
 func (s *Server) Start(ctx context.Context) error {
 	log.Printf("gRPC server started on %s", s.listener.Addr().String())
-	
+
 	errCh := make(chan error)
 	go func() {
 		if err := s.server.Serve(s.listener); err != nil {
