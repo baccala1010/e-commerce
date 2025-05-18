@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"fmt"
+	"github.com/baccala1010/e-commerce/inventory/pkg/kafka"
 
 	"github.com/baccala1010/e-commerce/inventory/internal/model"
 	"github.com/baccala1010/e-commerce/inventory/internal/repository"
@@ -15,7 +16,7 @@ type productUseCase struct {
 }
 
 // NewProductUseCase creates a new product use case
-func NewProductUseCase(productRepo repository.ProductRepository, categoryRepo repository.CategoryRepository) ProductUseCase {
+func NewProductUseCase(productRepo repository.ProductRepository, categoryRepo repository.CategoryRepository, producer *kafka.Producer) ProductUseCase {
 	return &productUseCase{
 		productRepo:  productRepo,
 		categoryRepo: categoryRepo,

@@ -12,13 +12,14 @@ import (
 
 	"github.com/baccala1010/e-commerce/inventory/internal/adapter/grpc/server/backoffice"
 	"github.com/baccala1010/e-commerce/inventory/internal/app"
+	"github.com/baccala1010/e-commerce/inventory/internal/cache"
 	"github.com/baccala1010/e-commerce/inventory/internal/config"
 	"github.com/baccala1010/e-commerce/inventory/internal/database"
 	"github.com/baccala1010/e-commerce/inventory/internal/handler"
 	"github.com/baccala1010/e-commerce/inventory/internal/middleware"
 	"github.com/baccala1010/e-commerce/inventory/internal/repository"
-	"github.com/baccala1010/e-commerce/inventory/internal/service"
 	"github.com/baccala1010/e-commerce/inventory/internal/usecase"
+	"github.com/baccala1010/e-commerce/inventory/pkg/kafka"
 	"github.com/baccala1010/e-commerce/inventory/pkg/pb"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -43,24 +44,46 @@ func main() {
 	}
 
 	// Initialize repositories
-	productRepo := repository.NewProductRepository(db)
+	baseProductRepo := repository.NewProductRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
 	discountRepo := repository.NewDiscountRepository(db)
 
+	// Initialize cache
+	productCache := cache.NewMemoryCache()
+
+	// Create cached repository
+	productRepo := repository.NewCachedProductRepository(baseProductRepo, productCache)
+
+	// Initialize cache with data
+	cachedRepo, ok := productRepo.(*repository.CachedProductRepository)
+	if ok {
+		if err := cachedRepo.RefreshCache(); err != nil {
+			logrus.Warnf("Failed to initialize product cache: %v", err)
+		}
+
+		// Set up periodic refresh (every 12 hours)
+		productCache.StartPeriodicRefresh(12*time.Hour, cachedRepo.RefreshCache)
+	}
+
+	// Initialize Kafka producer
+	kafkaProducer, err := kafka.NewProducer(cfg.Kafka.BootstrapServers, cfg.Kafka.Topics.ProductEvents)
+	if err != nil {
+		logrus.Warnf("Failed to initialize Kafka producer: %v", err)
+		logrus.Warn("Events will not be published to Kafka")
+		kafkaProducer = nil
+	} else {
+		logrus.Info("Kafka producer initialized successfully")
+	}
+
 	// Initialize use cases
-	productUseCase := usecase.NewProductUseCase(productRepo, categoryRepo)
+	productUseCase := usecase.NewProductUseCase(productRepo, categoryRepo, kafkaProducer)
 	categoryUseCase := usecase.NewCategoryUseCase(categoryRepo)
 	discountUseCase := usecase.NewDiscountUseCase(discountRepo, productRepo)
 
-	// Initialize services
-	productService := service.NewProductService(productUseCase)
-	categoryService := service.NewCategoryService(categoryUseCase)
-	discountService := service.NewDiscountService(discountUseCase)
-
 	// Initialize handlers
-	productHandler := handler.NewProductHandler(productService)
-	categoryHandler := handler.NewCategoryHandler(categoryService)
-	discountHandler := handler.NewDiscountHandler(discountService)
+	productHandler := handler.NewProductHandler(productUseCase)
+	categoryHandler := handler.NewCategoryHandler(categoryUseCase)
+	discountHandler := handler.NewDiscountHandler(discountUseCase)
 	// Create backoffice gRPC server instance
 	backofficeServer := backoffice.NewServer(productUseCase, categoryUseCase, discountUseCase)
 

@@ -2,29 +2,28 @@ package kafka
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
+	eventspb "github.com/baccala1010/e-commerce/order/pkg/pb/event
 	"github.com/baccala1010/e-commerce/statistics/internal/config"
 	"github.com/baccala1010/e-commerce/statistics/internal/model"
 	"github.com/baccala1010/e-commerce/statistics/internal/repository"
-	"github.com/baccala1010/e-commerce/statistics/pkg/kafka"
+	kafkawrapper "github.com/baccala1010/e-commerce/statistics/pkg/kafka"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/golang/protobuf/proto"
-	eventspb "github.com/baccala1010/e-commerce/order/pkg/pb/events"
 )
 
 // EventProcessor handles consuming events from Kafka and processing them
 type EventProcessor struct {
-	consumer        *kafka.Consumer
-	userRepo        repository.UserRepository
-	orderRepo       repository.OrderRepository
-	productRepo     repository.ProductRepository
-	orderEventTopic string
+	consumer          *kafka.Consumer
+	userRepo          repository.UserRepository
+	orderRepo         repository.OrderRepository
+	productRepo       repository.ProductRepository
+	orderEventTopic   string
 	productEventTopic string
-	userEventTopic string
+	userEventTopic    string
 }
 
 // NewEventProcessor creates a new Kafka event processor
@@ -49,13 +48,13 @@ func NewEventProcessor(
 	}
 
 	return &EventProcessor{
-		consumer:        kafkaConsumer,
-		userRepo:        userRepo,
-		orderRepo:       orderRepo,
-		productRepo:     productRepo,
-		orderEventTopic: cfg.Kafka.Topics.OrderEvents,
+		consumer:          kafkaConsumer,
+		userRepo:          userRepo,
+		orderRepo:         orderRepo,
+		productRepo:       productRepo,
+		orderEventTopic:   cfg.Kafka.Topics.OrderEvents,
 		productEventTopic: cfg.Kafka.Topics.ProductEvents,
-		userEventTopic: cfg.Kafka.Topics.UserEvents,
+		userEventTopic:    cfg.Kafka.Topics.UserEvents,
 	}, nil
 }
 

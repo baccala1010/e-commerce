@@ -11,6 +11,7 @@ type Config struct {
 	Server           ServerConfig
 	Database         DatabaseConfig
 	InventoryService InventoryServiceConfig `mapstructure:"inventory_service"`
+	Kafka            KafkaConfig
 	Logging          LoggingConfig
 }
 
@@ -38,6 +39,16 @@ type InventoryServiceConfig struct {
 
 type LoggingConfig struct {
 	Level string
+}
+
+type KafkaConfig struct {
+	BootstrapServers string `mapstructure:"bootstrap_servers"`
+	Topics           KafkaTopics
+}
+
+type KafkaTopics struct {
+	OrderEvents string `mapstructure:"order_events"`
+	UserEvents  string `mapstructure:"user_events"`
 }
 
 func LoadConfig(path string) (*Config, error) {

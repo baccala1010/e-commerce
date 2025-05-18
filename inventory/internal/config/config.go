@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
+	Kafka    KafkaConfig
 	Logging  LoggingConfig
 }
 
@@ -33,6 +34,15 @@ type DatabaseConfig struct {
 
 type LoggingConfig struct {
 	Level string
+}
+
+type KafkaConfig struct {
+	BootstrapServers string `mapstructure:"bootstrap_servers"`
+	Topics           KafkaTopics
+}
+
+type KafkaTopics struct {
+	ProductEvents string `mapstructure:"product_events"`
 }
 
 func LoadConfig(path string) (*Config, error) {

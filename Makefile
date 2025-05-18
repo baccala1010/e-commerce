@@ -29,6 +29,7 @@ clean:
 	rm -rf statistics/pkg/pb
 	rm -rf events/pkg/pb
 
+
 # Build all services
 build:
 	@echo "Building inventory service..."

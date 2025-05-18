@@ -12,6 +12,7 @@ import (
 
 	"github.com/baccala1010/e-commerce/order/internal/adapter/grpc/server/backoffice"
 	"github.com/baccala1010/e-commerce/order/internal/app"
+	"github.com/baccala1010/e-commerce/order/internal/cache"
 	"github.com/baccala1010/e-commerce/order/internal/config"
 	"github.com/baccala1010/e-commerce/order/internal/database"
 	"github.com/baccala1010/e-commerce/order/internal/handler"
@@ -45,8 +46,23 @@ func main() {
 	orderRepo := repository.NewOrderRepository(db)
 	reviewRepo := repository.NewReviewRepository(db)
 
+	// Initialize cache
+	orderCache := cache.NewMemoryCache()
+
+	// Create cached repository
+	cachedOrderRepo := repository.NewCachedOrderRepository(orderRepo, orderCache)
+
+	// Initialize cache with data and set up periodic refresh (every 12 hours)
+	err = cachedOrderRepo.(*repository.CachedOrderRepository).RefreshCache()
+	if err != nil {
+		logrus.Warnf("Failed to initialize order cache: %v", err)
+	}
+	orderCache.StartPeriodicRefresh(12*time.Hour, func() error {
+		return cachedOrderRepo.(*repository.CachedOrderRepository).RefreshCache()
+	})
+
 	// Initialize use cases
-	orderUseCase := usecase.NewOrderUseCase(orderRepo)
+	orderUseCase := usecase.NewOrderUseCase(cachedOrderRepo)
 	reviewUseCase := usecase.NewReviewUseCase(reviewRepo, orderRepo)
 
 	// Initialize handlers
@@ -129,6 +145,9 @@ func main() {
 	// Wait for termination signal
 	<-signalChan
 	logrus.Info("Received termination signal, shutting down...")
+
+	// Stop periodic cache refresh
+	orderCache.StopPeriodicRefresh()
 
 	// Graceful shutdown
 	grpcServer.GracefulStop()

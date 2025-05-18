@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 	"time"
 
@@ -9,9 +8,9 @@ import (
 )
 
 type Config struct {
-	Server ServerConfig `yaml:"server"`
-	DB     DBConfig     `yaml:"db"`
-	Kafka  KafkaConfig  `yaml:"kafka"`
+	Server  ServerConfig  `yaml:"server"`
+	DB      DBConfig      `yaml:"db"`
+	Kafka   KafkaConfig   `yaml:"kafka"`
 	Logging LoggingConfig `yaml:"logging"`
 }
 
