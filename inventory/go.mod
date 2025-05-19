@@ -3,7 +3,6 @@ module github.com/baccala1010/e-commerce/inventory
 go 1.23
 
 toolchain go1.24.3
-
 require (
 	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/gin-gonic/gin v1.9.1

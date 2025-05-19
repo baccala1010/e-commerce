@@ -1,6 +1,8 @@
 module github.com/baccala1010/e-commerce/statistics
 
-go 1.20
+go 1.23
+
+toolchain go1.24.3
 
 require (
 	github.com/Shopify/sarama v1.37.2
