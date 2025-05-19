@@ -1,8 +1,10 @@
 package usecase
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/baccala1010/e-commerce/inventory/pkg/kafka"
 
 	"github.com/baccala1010/e-commerce/inventory/internal/model"
@@ -11,15 +13,17 @@ import (
 )
 
 type productUseCase struct {
-	productRepo  repository.ProductRepository
-	categoryRepo repository.CategoryRepository
+	productRepo   repository.ProductRepository
+	categoryRepo  repository.CategoryRepository
+	kafkaProducer *kafka.Producer
 }
 
 // NewProductUseCase creates a new product use case
 func NewProductUseCase(productRepo repository.ProductRepository, categoryRepo repository.CategoryRepository, producer *kafka.Producer) ProductUseCase {
 	return &productUseCase{
-		productRepo:  productRepo,
-		categoryRepo: categoryRepo,
+		productRepo:   productRepo,
+		categoryRepo:  categoryRepo,
+		kafkaProducer: producer,
 	}
 }
 
@@ -44,6 +48,29 @@ func (u *productUseCase) CreateProduct(request model.CreateProductRequest) (*mod
 
 	if err := u.productRepo.Create(product); err != nil {
 		return nil, fmt.Errorf("error creating product: %w", err)
+	}
+
+	// Publish event to Kafka if producer is available
+	if u.kafkaProducer != nil {
+		event := map[string]interface{}{
+			"event_type":  "product_created",
+			"product_id":  product.ID.String(),
+			"name":        product.Name,
+			"category_id": product.CategoryID.String(),
+		}
+
+		eventJSON, err := json.Marshal(event)
+		if err != nil {
+			// Log error but don't fail the operation
+			fmt.Printf("Failed to marshal product event: %v\n", err)
+		} else {
+			if err := u.kafkaProducer.PublishEvent(product.ID.String(), eventJSON); err != nil {
+				// Log error but don't fail the operation
+				fmt.Printf("Failed to publish product created event: %v\n", err)
+			} else {
+				fmt.Printf("Product created event published for product: %s\n", product.ID.String())
+			}
+		}
 	}
 
 	return product, nil

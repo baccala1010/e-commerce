@@ -6,7 +6,7 @@ services:
     image: postgres:14-alpine
     container_name: e-commerce-postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
@@ -68,10 +68,11 @@ services:
       kafka:
         condition: service_healthy
     ports:
-      - "8083:8083"
+      - "50053:50053"  # Expose the gRPC port from config.docker.yaml
     restart: on-failure
     environment:
       - DOCKER=true
+      - CONFIG_PATH=/app/config/config.docker.yaml
 
   # Statistics database
   statistics-db:

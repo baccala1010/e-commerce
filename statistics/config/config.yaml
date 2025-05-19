@@ -1,26 +1,15 @@
-server:
-  host: "127.0.0.1"
-  port: "8083"
-  read_timeout: "5s"
-  write_timeout: "5s"
-
-db:
-  host: "127.0.0.1"
-  port: "5434"
-  user: "postgres"
-  password: "postgres"
-  name: "statistics_db"
-  ssl_mode: "disable"
-  max_connections: 5
-
+grpc:
+  port: 50053
 kafka:
-  bootstrap_servers: "127.0.0.1:9092"
-  consumer_group_id: "statistics-service"
+  brokers:
+    - localhost:9092
+  group_id: statistics-group
   topics:
-    order_events: "order-events"
-    product_events: "product-events"
-    user_events: "user-events"
-  auto_offset_reset: "earliest"
-
-logging:
-  level: "debug"
+    - order-events
+    - inventory-events
+database:
+  host: localhost
+  port: 5434
+  user: postgres
+  password: postgres
+  dbname: statistics_db

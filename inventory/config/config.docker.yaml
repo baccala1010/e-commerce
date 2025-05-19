@@ -14,5 +14,10 @@ database:
   max_open_connections: 100
   connection_max_lifetime: "1h"
 
+kafka:
+  bootstrap_servers: "kafka:9092"
+  topics:
+    product_events: "inventory-events"
+
 logging:
   level: "debug" 
