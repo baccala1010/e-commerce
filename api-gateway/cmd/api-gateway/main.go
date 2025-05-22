@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/baccala1010/e-commerce/api-gateway/internal/handler"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/baccala1010/e-commerce/api-gateway/internal/handler"
 
 	"github.com/baccala1010/e-commerce/api-gateway/internal/app"
 	"github.com/baccala1010/e-commerce/api-gateway/internal/config"
@@ -90,7 +91,7 @@ func main() {
 	router.POST("/orders", proxy.ProxyOrder())
 	router.PATCH("/orders/:id", proxy.ProxyOrder())
 	router.POST("/orders/:id/payment", proxy.ProxyOrder())
-	router.GET("/orders/:orderId/reviews", proxy.ProxyOrder())
+	router.GET("/orders/:id/reviews", proxy.ProxyOrder())
 
 	router.GET("/payments/:id", proxy.ProxyOrder())
 	router.PATCH("/payments/:id", proxy.ProxyOrder())

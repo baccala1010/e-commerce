@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v3.19.6
-// source: statistics/statistics.proto
+// source: proto/statistics/statistics.proto
 
 package pb
 
@@ -22,7 +22,7 @@ const (
 )
 
 type UserOrderStatisticsRequest struct {
-	state         protoimpl.MessageState
+	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -30,7 +30,7 @@ type UserOrderStatisticsRequest struct {
 
 func (x *UserOrderStatisticsRequest) Reset() {
 	*x = UserOrderStatisticsRequest{}
-	mi := &file_statistics_statistics_proto_msgTypes[0]
+	mi := &file_proto_statistics_statistics_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +42,7 @@ func (x *UserOrderStatisticsRequest) String() string {
 func (*UserOrderStatisticsRequest) ProtoMessage() {}
 
 func (x *UserOrderStatisticsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_statistics_statistics_proto_msgTypes[0]
+	mi := &file_proto_statistics_statistics_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +55,7 @@ func (x *UserOrderStatisticsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserOrderStatisticsRequest.ProtoReflect.Descriptor instead.
 func (*UserOrderStatisticsRequest) Descriptor() ([]byte, []int) {
-	return file_statistics_statistics_proto_rawDescGZIP(), []int{0}
+	return file_proto_statistics_statistics_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *UserOrderStatisticsRequest) GetUserId() string {
@@ -66,7 +66,7 @@ func (x *UserOrderStatisticsRequest) GetUserId() string {
 }
 
 type UserOrderStatisticsResponse struct {
-	state         protoimpl.MessageState
+	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderCount    int32                  `protobuf:"varint,1,opt,name=order_count,json=orderCount,proto3" json:"order_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -74,7 +74,7 @@ type UserOrderStatisticsResponse struct {
 
 func (x *UserOrderStatisticsResponse) Reset() {
 	*x = UserOrderStatisticsResponse{}
-	mi := &file_statistics_statistics_proto_msgTypes[1]
+	mi := &file_proto_statistics_statistics_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -86,7 +86,7 @@ func (x *UserOrderStatisticsResponse) String() string {
 func (*UserOrderStatisticsResponse) ProtoMessage() {}
 
 func (x *UserOrderStatisticsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_statistics_statistics_proto_msgTypes[1]
+	mi := &file_proto_statistics_statistics_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -99,7 +99,7 @@ func (x *UserOrderStatisticsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserOrderStatisticsResponse.ProtoReflect.Descriptor instead.
 func (*UserOrderStatisticsResponse) Descriptor() ([]byte, []int) {
-	return file_statistics_statistics_proto_rawDescGZIP(), []int{1}
+	return file_proto_statistics_statistics_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UserOrderStatisticsResponse) GetOrderCount() int32 {
@@ -109,67 +109,244 @@ func (x *UserOrderStatisticsResponse) GetOrderCount() int32 {
 	return 0
 }
 
-var File_statistics_statistics_proto protoreflect.FileDescriptor
+type GetAllUserOrdersStatisticsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Pagination fields (optional)
+	Page          int32 `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-const file_statistics_statistics_proto_rawDesc = "" +
+func (x *GetAllUserOrdersStatisticsRequest) Reset() {
+	*x = GetAllUserOrdersStatisticsRequest{}
+	mi := &file_proto_statistics_statistics_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAllUserOrdersStatisticsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAllUserOrdersStatisticsRequest) ProtoMessage() {}
+
+func (x *GetAllUserOrdersStatisticsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_statistics_statistics_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAllUserOrdersStatisticsRequest.ProtoReflect.Descriptor instead.
+func (*GetAllUserOrdersStatisticsRequest) Descriptor() ([]byte, []int) {
+	return file_proto_statistics_statistics_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GetAllUserOrdersStatisticsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetAllUserOrdersStatisticsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+type UserStatistic struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	OrderCount    int32                  `protobuf:"varint,2,opt,name=order_count,json=orderCount,proto3" json:"order_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserStatistic) Reset() {
+	*x = UserStatistic{}
+	mi := &file_proto_statistics_statistics_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserStatistic) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserStatistic) ProtoMessage() {}
+
+func (x *UserStatistic) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_statistics_statistics_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserStatistic.ProtoReflect.Descriptor instead.
+func (*UserStatistic) Descriptor() ([]byte, []int) {
+	return file_proto_statistics_statistics_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UserStatistic) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UserStatistic) GetOrderCount() int32 {
+	if x != nil {
+		return x.OrderCount
+	}
+	return 0
+}
+
+type GetAllUserOrdersStatisticsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Statistics    []*UserStatistic       `protobuf:"bytes,1,rep,name=statistics,proto3" json:"statistics,omitempty"`
+	TotalCount    int32                  `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"` // Total count for pagination
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAllUserOrdersStatisticsResponse) Reset() {
+	*x = GetAllUserOrdersStatisticsResponse{}
+	mi := &file_proto_statistics_statistics_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAllUserOrdersStatisticsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAllUserOrdersStatisticsResponse) ProtoMessage() {}
+
+func (x *GetAllUserOrdersStatisticsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_statistics_statistics_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAllUserOrdersStatisticsResponse.ProtoReflect.Descriptor instead.
+func (*GetAllUserOrdersStatisticsResponse) Descriptor() ([]byte, []int) {
+	return file_proto_statistics_statistics_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetAllUserOrdersStatisticsResponse) GetStatistics() []*UserStatistic {
+	if x != nil {
+		return x.Statistics
+	}
+	return nil
+}
+
+func (x *GetAllUserOrdersStatisticsResponse) GetTotalCount() int32 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
+var File_proto_statistics_statistics_proto protoreflect.FileDescriptor
+
+const file_proto_statistics_statistics_proto_rawDesc = "" +
 	"\n" +
-	"\x1bstatistics/statistics.proto\x12\n" +
+	"!proto/statistics/statistics.proto\x12\n" +
 	"statistics\"5\n" +
 	"\x1aUserOrderStatisticsRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\">\n" +
 	"\x1bUserOrderStatisticsResponse\x12\x1f\n" +
 	"\vorder_count\x18\x01 \x01(\x05R\n" +
-	"orderCount2\x7f\n" +
+	"orderCount\"T\n" +
+	"!GetAllUserOrdersStatisticsRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"I\n" +
+	"\rUserStatistic\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n" +
+	"\vorder_count\x18\x02 \x01(\x05R\n" +
+	"orderCount\"\x80\x01\n" +
+	"\"GetAllUserOrdersStatisticsResponse\x129\n" +
+	"\n" +
+	"statistics\x18\x01 \x03(\v2\x19.statistics.UserStatisticR\n" +
+	"statistics\x12\x1f\n" +
+	"\vtotal_count\x18\x02 \x01(\x05R\n" +
+	"totalCount2\xfc\x01\n" +
 	"\x11StatisticsService\x12j\n" +
-	"\x17GetUserOrdersStatistics\x12&.statistics.UserOrderStatisticsRequest\x1a'.statistics.UserOrderStatisticsResponseB8Z6github.com/baccala1010/e-commerce/statistics/pkg/pb;pbb\x06proto3"
+	"\x17GetUserOrdersStatistics\x12&.statistics.UserOrderStatisticsRequest\x1a'.statistics.UserOrderStatisticsResponse\x12{\n" +
+	"\x1aGetAllUserOrdersStatistics\x12-.statistics.GetAllUserOrdersStatisticsRequest\x1a..statistics.GetAllUserOrdersStatisticsResponseB8Z6github.com/baccala1010/e-commerce/statistics/pkg/pb;pbb\x06proto3"
 
 var (
-	file_statistics_statistics_proto_rawDescOnce sync.Once
-	file_statistics_statistics_proto_rawDescData []byte
+	file_proto_statistics_statistics_proto_rawDescOnce sync.Once
+	file_proto_statistics_statistics_proto_rawDescData []byte
 )
 
-func file_statistics_statistics_proto_rawDescGZIP() []byte {
-	file_statistics_statistics_proto_rawDescOnce.Do(func() {
-		file_statistics_statistics_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_statistics_statistics_proto_rawDesc), len(file_statistics_statistics_proto_rawDesc)))
+func file_proto_statistics_statistics_proto_rawDescGZIP() []byte {
+	file_proto_statistics_statistics_proto_rawDescOnce.Do(func() {
+		file_proto_statistics_statistics_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_statistics_statistics_proto_rawDesc), len(file_proto_statistics_statistics_proto_rawDesc)))
 	})
-	return file_statistics_statistics_proto_rawDescData
+	return file_proto_statistics_statistics_proto_rawDescData
 }
 
-var file_statistics_statistics_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_statistics_statistics_proto_goTypes = []any{
-	(*UserOrderStatisticsRequest)(nil),  // 0: statistics.UserOrderStatisticsRequest
-	(*UserOrderStatisticsResponse)(nil), // 1: statistics.UserOrderStatisticsResponse
+var file_proto_statistics_statistics_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_proto_statistics_statistics_proto_goTypes = []any{
+	(*UserOrderStatisticsRequest)(nil),         // 0: statistics.UserOrderStatisticsRequest
+	(*UserOrderStatisticsResponse)(nil),        // 1: statistics.UserOrderStatisticsResponse
+	(*GetAllUserOrdersStatisticsRequest)(nil),  // 2: statistics.GetAllUserOrdersStatisticsRequest
+	(*UserStatistic)(nil),                      // 3: statistics.UserStatistic
+	(*GetAllUserOrdersStatisticsResponse)(nil), // 4: statistics.GetAllUserOrdersStatisticsResponse
 }
-var file_statistics_statistics_proto_depIdxs = []int32{
-	0, // 0: statistics.StatisticsService.GetUserOrdersStatistics:input_type -> statistics.UserOrderStatisticsRequest
-	1, // 1: statistics.StatisticsService.GetUserOrdersStatistics:output_type -> statistics.UserOrderStatisticsResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+var file_proto_statistics_statistics_proto_depIdxs = []int32{
+	3, // 0: statistics.GetAllUserOrdersStatisticsResponse.statistics:type_name -> statistics.UserStatistic
+	0, // 1: statistics.StatisticsService.GetUserOrdersStatistics:input_type -> statistics.UserOrderStatisticsRequest
+	2, // 2: statistics.StatisticsService.GetAllUserOrdersStatistics:input_type -> statistics.GetAllUserOrdersStatisticsRequest
+	1, // 3: statistics.StatisticsService.GetUserOrdersStatistics:output_type -> statistics.UserOrderStatisticsResponse
+	4, // 4: statistics.StatisticsService.GetAllUserOrdersStatistics:output_type -> statistics.GetAllUserOrdersStatisticsResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_statistics_statistics_proto_init() }
-func file_statistics_statistics_proto_init() {
-	if File_statistics_statistics_proto != nil {
+func init() { file_proto_statistics_statistics_proto_init() }
+func file_proto_statistics_statistics_proto_init() {
+	if File_proto_statistics_statistics_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_statistics_statistics_proto_rawDesc), len(file_statistics_statistics_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_statistics_statistics_proto_rawDesc), len(file_proto_statistics_statistics_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_statistics_statistics_proto_goTypes,
-		DependencyIndexes: file_statistics_statistics_proto_depIdxs,
-		MessageInfos:      file_statistics_statistics_proto_msgTypes,
+		GoTypes:           file_proto_statistics_statistics_proto_goTypes,
+		DependencyIndexes: file_proto_statistics_statistics_proto_depIdxs,
+		MessageInfos:      file_proto_statistics_statistics_proto_msgTypes,
 	}.Build()
-	File_statistics_statistics_proto = out.File
-	file_statistics_statistics_proto_goTypes = nil
-	file_statistics_statistics_proto_depIdxs = nil
+	File_proto_statistics_statistics_proto = out.File
+	file_proto_statistics_statistics_proto_goTypes = nil
+	file_proto_statistics_statistics_proto_depIdxs = nil
 }

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v3.19.6
-// source: statistics/statistics.proto
+// source: proto/statistics/statistics.proto
 
 package pb
 
@@ -15,10 +15,11 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-// Requires gRPC-Go v1.64.0 or later.
+const _ = grpc.SupportPackageIsVersion7
 
 const (
-	StatisticsService_GetUserOrdersStatistics_FullMethodName = "/statistics.StatisticsService/GetUserOrdersStatistics"
+	StatisticsService_GetUserOrdersStatistics_FullMethodName    = "/statistics.StatisticsService/GetUserOrdersStatistics"
+	StatisticsService_GetAllUserOrdersStatistics_FullMethodName = "/statistics.StatisticsService/GetAllUserOrdersStatistics"
 )
 
 // StatisticsServiceClient is the client API for StatisticsService service.
@@ -26,6 +27,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StatisticsServiceClient interface {
 	GetUserOrdersStatistics(ctx context.Context, in *UserOrderStatisticsRequest, opts ...grpc.CallOption) (*UserOrderStatisticsResponse, error)
+	GetAllUserOrdersStatistics(ctx context.Context, in *GetAllUserOrdersStatisticsRequest, opts ...grpc.CallOption) (*GetAllUserOrdersStatisticsResponse, error)
 }
 
 type statisticsServiceClient struct {
@@ -46,11 +48,22 @@ func (c *statisticsServiceClient) GetUserOrdersStatistics(ctx context.Context, i
 	return out, nil
 }
 
+func (c *statisticsServiceClient) GetAllUserOrdersStatistics(ctx context.Context, in *GetAllUserOrdersStatisticsRequest, opts ...grpc.CallOption) (*GetAllUserOrdersStatisticsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAllUserOrdersStatisticsResponse)
+	err := c.cc.Invoke(ctx, StatisticsService_GetAllUserOrdersStatistics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StatisticsServiceServer is the server API for StatisticsService service.
 // All implementations must embed UnimplementedStatisticsServiceServer
 // for forward compatibility.
 type StatisticsServiceServer interface {
 	GetUserOrdersStatistics(context.Context, *UserOrderStatisticsRequest) (*UserOrderStatisticsResponse, error)
+	GetAllUserOrdersStatistics(context.Context, *GetAllUserOrdersStatisticsRequest) (*GetAllUserOrdersStatisticsResponse, error)
 	mustEmbedUnimplementedStatisticsServiceServer()
 }
 
@@ -63,6 +76,9 @@ type UnimplementedStatisticsServiceServer struct{}
 
 func (UnimplementedStatisticsServiceServer) GetUserOrdersStatistics(context.Context, *UserOrderStatisticsRequest) (*UserOrderStatisticsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserOrdersStatistics not implemented")
+}
+func (UnimplementedStatisticsServiceServer) GetAllUserOrdersStatistics(context.Context, *GetAllUserOrdersStatisticsRequest) (*GetAllUserOrdersStatisticsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllUserOrdersStatistics not implemented")
 }
 func (UnimplementedStatisticsServiceServer) mustEmbedUnimplementedStatisticsServiceServer() {}
 func (UnimplementedStatisticsServiceServer) testEmbeddedByValue()                           {}
@@ -103,6 +119,24 @@ func _StatisticsService_GetUserOrdersStatistics_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StatisticsService_GetAllUserOrdersStatistics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllUserOrdersStatisticsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StatisticsServiceServer).GetAllUserOrdersStatistics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StatisticsService_GetAllUserOrdersStatistics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StatisticsServiceServer).GetAllUserOrdersStatistics(ctx, req.(*GetAllUserOrdersStatisticsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StatisticsService_ServiceDesc is the grpc.ServiceDesc for StatisticsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,7 +148,11 @@ var StatisticsService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetUserOrdersStatistics",
 			Handler:    _StatisticsService_GetUserOrdersStatistics_Handler,
 		},
+		{
+			MethodName: "GetAllUserOrdersStatistics",
+			Handler:    _StatisticsService_GetAllUserOrdersStatistics_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "statistics/statistics.proto",
+	Metadata: "proto/statistics/statistics.proto",
 }

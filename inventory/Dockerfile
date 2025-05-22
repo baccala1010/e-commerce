@@ -1,33 +1,26 @@
-FROM golang:1.23-alpine AS builder
+FROM golang:1.23 as builder
 
 WORKDIR /app
 
-# Copy go mod and sum files
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    librdkafka-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY go.mod go.sum ./
-
-# Download dependencies
 RUN go mod download
-
-# Copy the source code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o inventory-service ./cmd/inventory
+# Build the application for Linux/amd64 and statically link
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -a -o inventory-service ./cmd/inventory && ls -lh inventory-service
 
-# Use a smaller image for the final build
 FROM alpine:latest
 
+RUN apk --no-cache add ca-certificates libc6-compat
 WORKDIR /app
+COPY --from=builder /app/inventory-service /app/inventory-service
+COPY --from=builder /app/config/config.docker.yaml /app/config/config.docker.yaml
 
-# Copy the binary from builder
-COPY --from=builder /app/inventory-service .
-COPY --from=builder /app/config ./config
-
-# Set the Docker-specific config file
-ENV CONFIG_PATH=/app/config/config.docker.yaml
-
-# Expose the port
-EXPOSE 8081
-
-# Run the service
-CMD ["./inventory-service"] 
+EXPOSE 8081 9081
+CMD ["/app/inventory-service"]

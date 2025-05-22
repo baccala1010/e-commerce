@@ -19,6 +19,7 @@ import (
 	"github.com/baccala1010/e-commerce/order/internal/middleware"
 	"github.com/baccala1010/e-commerce/order/internal/repository"
 	"github.com/baccala1010/e-commerce/order/internal/usecase"
+	"github.com/baccala1010/e-commerce/order/pkg/kafka"
 	"github.com/baccala1010/e-commerce/order/pkg/pb"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -61,8 +62,15 @@ func main() {
 		return cachedOrderRepo.(*repository.CachedOrderRepository).RefreshCache()
 	})
 
+	// Initialize Kafka producer
+	kafkaProducer, err := kafka.NewProducer(cfg.Kafka.BootstrapServers, "order-events")
+	if err != nil {
+		logrus.Fatalf("Failed to initialize Kafka producer: %v", err)
+	}
+	defer kafkaProducer.Close()
+
 	// Initialize use cases
-	orderUseCase := usecase.NewOrderUseCase(cachedOrderRepo)
+	orderUseCase := usecase.NewOrderUseCase(cachedOrderRepo, kafkaProducer)
 	reviewUseCase := usecase.NewReviewUseCase(reviewRepo, orderRepo)
 
 	// Initialize handlers
@@ -97,7 +105,7 @@ func main() {
 			orders.GET("/:id", orderHandler.GetOrderByID)
 			orders.PATCH("/:id/status", orderHandler.UpdateOrderStatus)
 			orders.GET("", orderHandler.ListUserOrders)
-			orders.GET("/:orderId/reviews", reviewHandler.GetReviewsByOrderID)
+			orders.GET("/:id/reviews", reviewHandler.GetReviewsByOrderID)
 		}
 
 		reviews := v1.Group("/reviews")

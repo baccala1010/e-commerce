@@ -1,22 +1,26 @@
 package usecase
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/baccala1010/e-commerce/order/internal/model"
 	"github.com/baccala1010/e-commerce/order/internal/repository"
+	"github.com/baccala1010/e-commerce/order/pkg/kafka"
 	"github.com/google/uuid"
 )
 
 type orderUseCase struct {
-	orderRepo repository.OrderRepository
+	orderRepo     repository.OrderRepository
+	kafkaProducer *kafka.Producer
 }
 
 // NewOrderUseCase creates a new order use case
-func NewOrderUseCase(orderRepo repository.OrderRepository) OrderUseCase {
+func NewOrderUseCase(orderRepo repository.OrderRepository, producer *kafka.Producer) OrderUseCase {
 	return &orderUseCase{
-		orderRepo: orderRepo,
+		orderRepo:     orderRepo,
+		kafkaProducer: producer,
 	}
 }
 
@@ -44,6 +48,27 @@ func (u *orderUseCase) CreateOrder(request model.CreateOrderRequest) (*model.Ord
 
 	if err := u.orderRepo.Create(order); err != nil {
 		return nil, fmt.Errorf("error creating order: %w", err)
+	}
+
+	// Publish event to Kafka if producer is available
+	if u.kafkaProducer != nil {
+		event := map[string]interface{}{
+			"event_type":   "order_created",
+			"order_id":     order.ID.String(),
+			"user_id":      order.UserID.String(),
+			"total_amount": order.TotalAmount,
+			"status":       order.Status,
+		}
+		eventJSON, err := json.Marshal(event)
+		if err != nil {
+			fmt.Printf("Failed to marshal order event: %v\n", err)
+		} else {
+			if err := u.kafkaProducer.PublishEvent(order.ID.String(), eventJSON); err != nil {
+				fmt.Printf("Failed to publish order created event: %v\n", err)
+			} else {
+				fmt.Printf("Order created event published for order: %s\n", order.ID.String())
+			}
+		}
 	}
 
 	return order, nil

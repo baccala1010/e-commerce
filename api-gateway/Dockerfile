@@ -1,15 +1,22 @@
-FROM golang:1.20-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
+# Install git for go mod download
+RUN apk add --no-cache git
+
 # Copy go mod and sum files
-COPY go.mod go.sum ./
+COPY api-gateway/go.mod api-gateway/go.sum ./
+
+# Copy local modules for monorepo build
+COPY inventory ./inventory
+COPY order ./order
 
 # Download dependencies
 RUN go mod download
 
 # Copy the source code
-COPY . .
+COPY api-gateway/. .
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o api-gateway ./cmd/api-gateway
@@ -30,4 +37,4 @@ ENV CONFIG_PATH=/app/config/config.docker.yaml
 EXPOSE 8080
 
 # Run the service
-CMD ["./api-gateway"] 
+CMD ["./api-gateway"]

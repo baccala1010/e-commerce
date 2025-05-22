@@ -12,6 +12,7 @@ services:
       - POSTGRES_USER=postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -35,6 +36,7 @@ services:
     restart: on-failure
     environment:
       - DOCKER=true
+      - CONFIG_PATH=/app/config/config.docker.yaml
 
   # Order service
   order-service:
@@ -51,10 +53,12 @@ services:
         condition: service_healthy
     ports:
       - "8082:8082"
+      - "8083:8083"
       - "9082:9082"
-    restart: on-failure
+    restart: always
     environment:
       - DOCKER=true
+      - CONFIG_PATH=/app/config/config.docker.yaml
 
   # Statistics service
   statistics-service:
@@ -134,8 +138,8 @@ services:
   # API Gateway
   api-gateway:
     build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api-gateway/Dockerfile
     container_name: e-commerce-api-gateway
     depends_on:
       - inventory-service

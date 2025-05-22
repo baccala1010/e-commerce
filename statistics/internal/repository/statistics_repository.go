@@ -12,6 +12,7 @@ type StatisticsRepository interface {
 	IncrementOrderCount(ctx context.Context, userID uuid.UUID) error
 	DecrementOrderCount(ctx context.Context, userID uuid.UUID) error
 	GetOrderCount(ctx context.Context, userID uuid.UUID) (int, error)
+	GetAllStatistics(ctx context.Context, page, pageSize int) ([]model.UserOrderStatistic, int64, error)
 }
 
 type statisticsRepository struct {
@@ -42,4 +43,28 @@ func (r *statisticsRepository) GetOrderCount(ctx context.Context, userID uuid.UU
 		return 0, err
 	}
 	return stat.OrderCount, nil
+}
+
+func (r *statisticsRepository) GetAllStatistics(ctx context.Context, page, pageSize int) ([]model.UserOrderStatistic, int64, error) {
+	var stats []model.UserOrderStatistic
+	var totalCount int64
+
+	// Count total records
+	if err := r.db.WithContext(ctx).Model(&model.UserOrderStatistic{}).Count(&totalCount).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Query with pagination
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+
+	query := r.db.WithContext(ctx).Model(&model.UserOrderStatistic{})
+	if pageSize > 0 {
+		query = query.Offset(offset).Limit(pageSize)
+	}
+
+	err := query.Order("order_count DESC").Find(&stats).Error
+	return stats, totalCount, err
 }

@@ -18,3 +18,21 @@ func NewStatisticsUsecase(repo repository.StatisticsRepository) StatisticsUsecas
 func (u *statisticsUsecase) GetUserOrderCount(ctx context.Context, userID uuid.UUID) (int, error) {
 	return u.repo.GetOrderCount(ctx, userID)
 }
+
+func (u *statisticsUsecase) GetAllUserOrderStatistics(ctx context.Context, page, pageSize int) ([]UserStatistic, int64, error) {
+	stats, total, err := u.repo.GetAllStatistics(ctx, page, pageSize)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Map from model to usecase type
+	result := make([]UserStatistic, len(stats))
+	for i, stat := range stats {
+		result[i] = UserStatistic{
+			UserID:     stat.UserID.String(),
+			OrderCount: stat.OrderCount,
+		}
+	}
+
+	return result, total, nil
+}

@@ -1,13 +1,14 @@
 module github.com/baccala1010/e-commerce/order
 
-go 1.23.0
+go 1.23
 
-toolchain go1.24.2
+toolchain go1.24.3
 
 require (
 	github.com/confluentinc/confluent-kafka-go v1.9.2
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.6.0
+	github.com/lib/pq v1.10.9
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.18.2
 	google.golang.org/grpc v1.72.0

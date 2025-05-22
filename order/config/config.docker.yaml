@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 8082
   grpc_port: 9082
   name: "order-service"
 
@@ -17,5 +17,12 @@ database:
 inventory_service:
   base_url: "http://inventory-service:8081"
 
+kafka:
+  bootstrap_servers: "kafka:9092"
+  topics:
+    order_events: "order-events"
+    user_events: "user-events"
+
 logging:
-  level: "debug" 
+  level: "debug"
+

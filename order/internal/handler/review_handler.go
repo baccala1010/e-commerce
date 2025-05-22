@@ -67,7 +67,7 @@ func (h *ReviewHandler) GetReviewByID(c *gin.Context) {
 
 // GetReviewsByOrderID handles the request to get all reviews for an order
 func (h *ReviewHandler) GetReviewsByOrderID(c *gin.Context) {
-	orderIDStr := c.Param("orderId")
+	orderIDStr := c.Param("id")
 	orderID, err := uuid.Parse(orderIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid order ID format"})
