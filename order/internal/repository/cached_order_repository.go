@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/baccala1010/e-commerce/order/internal/cache"
 	"github.com/baccala1010/e-commerce/order/internal/model"
@@ -31,8 +32,10 @@ func (r *CachedOrderRepository) Create(order *model.Order) error {
 
 func (r *CachedOrderRepository) FindByID(id uuid.UUID) (*model.Order, error) {
 	if order, found := r.cache.GetOrder(id); found {
+		log.Printf("[CACHE HIT] Order ID: %s", id)
 		return order, nil
 	}
+	log.Printf("[CACHE MISS] Order ID: %s", id)
 	order, err := r.repo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -47,8 +50,10 @@ func (r *CachedOrderRepository) FindByID(id uuid.UUID) (*model.Order, error) {
 func (r *CachedOrderRepository) FindByUserID(userID uuid.UUID, page, pageSize int) ([]model.Order, int64, error) {
 	cacheKey := fmt.Sprintf("user:%s:page:%d:size:%d", userID.String(), page, pageSize)
 	if orders, total, found := r.cache.GetOrderList(cacheKey); found {
+		log.Printf("[CACHE HIT] Order List Key: %s", cacheKey)
 		return orders, total, nil
 	}
+	log.Printf("[CACHE MISS] Order List Key: %s", cacheKey)
 	orders, total, err := r.repo.FindByUserID(userID, page, pageSize)
 	if err != nil {
 		return nil, 0, err
@@ -58,9 +63,18 @@ func (r *CachedOrderRepository) FindByUserID(userID uuid.UUID, page, pageSize in
 }
 
 func (r *CachedOrderRepository) RefreshCache() error {
-	// Example: refresh cache for first 100 users (in production, use a better approach)
-	// This is a placeholder; you may want to load all orders or recent orders
-	return nil // Implement as needed
+	r.cache.Clear()
+	// Example: load all orders (for demo, first 1000 orders)
+	// In production, use paging or a more scalable approach
+	orders, err := r.repo.FindAll()
+	if err != nil {
+		return err
+	}
+	for i := range orders {
+		r.cache.SetOrder(&orders[i])
+	}
+	log.Printf("[CACHE INIT] Loaded %d orders into cache", len(orders))
+	return nil
 }
 
 // Add missing Update method to satisfy OrderRepository interface
@@ -71,4 +85,8 @@ func (r *CachedOrderRepository) Update(order *model.Order) error {
 	}
 	r.cache.SetOrder(order)
 	return nil
+}
+
+func (r *CachedOrderRepository) FindAll() ([]model.Order, error) {
+	return r.repo.FindAll()
 }

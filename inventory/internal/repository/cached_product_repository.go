@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/baccala1010/e-commerce/inventory/internal/cache"
 	"github.com/baccala1010/e-commerce/inventory/internal/model"
@@ -43,8 +44,10 @@ func (r *CachedProductRepository) Create(product *model.Product) error {
 func (r *CachedProductRepository) FindByID(id uuid.UUID) (*model.Product, error) {
 	// Try to get the product from the cache
 	if product, found := r.cache.GetProduct(id); found {
+		log.Printf("[CACHE HIT] Product ID: %s", id)
 		return product, nil
 	}
+	log.Printf("[CACHE MISS] Product ID: %s", id)
 
 	// If not in cache, get from the database
 	product, err := r.repo.FindByID(id)
@@ -99,8 +102,10 @@ func (r *CachedProductRepository) List(params ListProductParams) ([]model.Produc
 
 	// Try to get the product list from the cache
 	if products, total, found := r.cache.GetProductList(cacheKey); found {
+		log.Printf("[CACHE HIT] Product List Key: %s", cacheKey)
 		return products, total, nil
 	}
+	log.Printf("[CACHE MISS] Product List Key: %s", cacheKey)
 
 	// If not in cache, get from the database
 	products, total, err := r.repo.List(params)

@@ -1,124 +1,86 @@
 package cache
 
 import (
-	"sync"
-	"time"
-
 	"github.com/baccala1010/e-commerce/order/internal/model"
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
+	"sync"
+	"time"
 )
 
-type MemoryCache struct {
-	orders          map[uuid.UUID]*model.Order
-	orderLists      map[string]orderListCacheItem
-	mu              sync.RWMutex
-	refreshTicker   *time.Ticker
-	stopRefreshChan chan struct{}
+type InMemoryOrderCache struct {
+	mu         sync.RWMutex
+	items      map[uuid.UUID]*model.Order
+	listCache  map[string][]model.Order
+	totalCache map[string]int64
+	stopCh     chan struct{}
 }
 
-type orderListCacheItem struct {
-	orders  []model.Order
-	total   int64
-	created time.Time
-}
-
-func NewMemoryCache() *MemoryCache {
-	return &MemoryCache{
-		orders:          make(map[uuid.UUID]*model.Order),
-		orderLists:      make(map[string]orderListCacheItem),
-		stopRefreshChan: make(chan struct{}),
+func NewInMemoryOrderCache() *InMemoryOrderCache {
+	return &InMemoryOrderCache{
+		items:      make(map[uuid.UUID]*model.Order),
+		listCache:  make(map[string][]model.Order),
+		totalCache: make(map[string]int64),
+		stopCh:     make(chan struct{}),
 	}
 }
 
-func (c *MemoryCache) GetOrder(id uuid.UUID) (*model.Order, bool) {
+func (c *InMemoryOrderCache) GetOrder(id uuid.UUID) (*model.Order, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	order, exists := c.orders[id]
-	if !exists {
-		return nil, false
-	}
-	orderCopy := *order
-	return &orderCopy, true
+	order, ok := c.items[id]
+	return order, ok
 }
 
-func (c *MemoryCache) SetOrder(order *model.Order) {
-	if order == nil {
-		return
-	}
+func (c *InMemoryOrderCache) SetOrder(order *model.Order) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	orderCopy := *order
-	c.orders[order.ID] = &orderCopy
+	c.items[order.ID] = order
 }
 
-func (c *MemoryCache) DeleteOrder(id uuid.UUID) {
+func (c *InMemoryOrderCache) DeleteOrder(id uuid.UUID) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	delete(c.orders, id)
+	delete(c.items, id)
 }
 
-func (c *MemoryCache) GetOrderList(key string) ([]model.Order, int64, bool) {
+func (c *InMemoryOrderCache) GetOrderList(key string) ([]model.Order, int64, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	item, exists := c.orderLists[key]
-	if !exists {
-		return nil, 0, false
-	}
-	ordersCopy := make([]model.Order, len(item.orders))
-	for i, order := range item.orders {
-		ordersCopy[i] = order
-	}
-	return ordersCopy, item.total, true
+	list, ok := c.listCache[key]
+	total := c.totalCache[key]
+	return list, total, ok
 }
 
-func (c *MemoryCache) SetOrderList(key string, orders []model.Order, total int64) {
+func (c *InMemoryOrderCache) SetOrderList(key string, orders []model.Order, total int64) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	ordersCopy := make([]model.Order, len(orders))
-	for i, order := range orders {
-		ordersCopy[i] = order
-	}
-	c.orderLists[key] = orderListCacheItem{
-		orders:  ordersCopy,
-		total:   total,
-		created: time.Now(),
-	}
+	c.listCache[key] = orders
+	c.totalCache[key] = total
 }
 
-func (c *MemoryCache) Clear() {
+func (c *InMemoryOrderCache) Clear() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.orders = make(map[uuid.UUID]*model.Order)
-	c.orderLists = make(map[string]orderListCacheItem)
+	c.items = make(map[uuid.UUID]*model.Order)
+	c.listCache = make(map[string][]model.Order)
+	c.totalCache = make(map[string]int64)
 }
 
-func (c *MemoryCache) StartPeriodicRefresh(interval time.Duration, refreshFunc func() error) {
-	c.stopRefreshChan = make(chan struct{})
-	c.refreshTicker = time.NewTicker(interval)
+func (c *InMemoryOrderCache) StartPeriodicRefresh(interval time.Duration, refreshFunc func() error) {
 	go func() {
-		if err := refreshFunc(); err != nil {
-			logrus.Errorf("Error during initial cache refresh: %v", err)
-		}
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
 		for {
 			select {
-			case <-c.refreshTicker.C:
-				if err := refreshFunc(); err != nil {
-					logrus.Errorf("Error refreshing cache: %v", err)
-				}
-			case <-c.stopRefreshChan:
-				c.refreshTicker.Stop()
+			case <-ticker.C:
+				_ = refreshFunc()
+			case <-c.stopCh:
 				return
 			}
 		}
 	}()
-	logrus.Infof("Started periodic cache refresh every %v", interval)
 }
 
-func (c *MemoryCache) StopPeriodicRefresh() {
-	if c.refreshTicker != nil {
-		close(c.stopRefreshChan)
-		c.refreshTicker = nil
-		logrus.Info("Stopped periodic cache refresh")
-	}
+func (c *InMemoryOrderCache) StopPeriodicRefresh() {
+	close(c.stopCh)
 }

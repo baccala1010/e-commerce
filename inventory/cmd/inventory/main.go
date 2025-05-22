@@ -49,7 +49,7 @@ func main() {
 	discountRepo := repository.NewDiscountRepository(db)
 
 	// Initialize cache
-	productCache := cache.NewMemoryCache()
+	productCache := cache.NewInMemoryProductCache()
 
 	// Create cached repository
 	productRepo := repository.NewCachedProductRepository(baseProductRepo, productCache)
@@ -60,8 +60,6 @@ func main() {
 		if err := cachedRepo.RefreshCache(); err != nil {
 			logrus.Warnf("Failed to initialize product cache: %v", err)
 		}
-
-		// Set up periodic refresh (every 12 hours)
 		productCache.StartPeriodicRefresh(12*time.Hour, cachedRepo.RefreshCache)
 	}
 

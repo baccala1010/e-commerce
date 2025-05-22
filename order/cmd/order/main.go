@@ -48,7 +48,7 @@ func main() {
 	reviewRepo := repository.NewReviewRepository(db)
 
 	// Initialize cache
-	orderCache := cache.NewMemoryCache()
+	orderCache := cache.NewInMemoryOrderCache()
 
 	// Create cached repository
 	cachedOrderRepo := repository.NewCachedOrderRepository(orderRepo, orderCache)

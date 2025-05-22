@@ -13,6 +13,7 @@ type OrderRepository interface {
 	FindByID(id uuid.UUID) (*model.Order, error)
 	Update(order *model.Order) error
 	FindByUserID(userID uuid.UUID, page, pageSize int) ([]model.Order, int64, error)
+	FindAll() ([]model.Order, error)
 }
 
 type orderRepository struct {
@@ -71,4 +72,12 @@ func (r *orderRepository) FindByUserID(userID uuid.UUID, page, pageSize int) ([]
 	}
 
 	return orders, total, nil
+}
+
+func (r *orderRepository) FindAll() ([]model.Order, error) {
+	var orders []model.Order
+	if err := r.db.Preload("Payment").Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return orders, nil
 }
