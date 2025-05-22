@@ -2,12 +2,6 @@ package app
 
 import (
 	"context"
-	"log"
-	"os"
-	"os/signal"
-	"strconv"
-	"syscall"
-
 	"github.com/Shopify/sarama"
 	grpcadapter "github.com/baccala1010/e-commerce/statistics/internal/adapter/grpc"
 	"github.com/baccala1010/e-commerce/statistics/internal/adapter/kafka"
@@ -16,6 +10,12 @@ import (
 	"github.com/baccala1010/e-commerce/statistics/internal/handler"
 	"github.com/baccala1010/e-commerce/statistics/internal/repository"
 	"github.com/baccala1010/e-commerce/statistics/internal/usecase"
+	"log"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+	"time"
 )
 
 func Run() {
@@ -55,9 +55,43 @@ func Run() {
 			}
 		}
 	}()
-	// Wait for shutdown
+
+	producer, err := kafka.NewProducer(cfg.Kafka.Brokers)
+	if err != nil {
+		log.Printf("failed to create kafka producer: %v", err)
+	}
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	if producer != nil {
+		go func() {
+			ticker := time.NewTicker(time.Hour)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ticker.C:
+					msg := "product"
+					if time.Now().Unix()%2 == 0 {
+						msg = "order"
+					}
+
+					_, _, err := producer.SendMessage(&sarama.ProducerMessage{
+						Topic: cfg.Kafka.Topics[0],
+						Value: sarama.StringEncoder(msg),
+					})
+					if err != nil {
+						log.Printf("failed to send message: %v", err)
+					} else {
+						log.Printf("message sent: %s", msg)
+					}
+				case <-quit:
+					return
+				}
+			}
+		}()
+	}
+
 	<-quit
 	log.Println("Shutting down statistics service...")
 	_ = group.Close()
